@@ -13,6 +13,7 @@ import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useFeed } from "@/hooks/useFeed"
+import { useFileUpload } from "@/hooks/useFileUpload"
 import type { User } from "@/types"
 
 interface CreatePostCardProps {
@@ -31,7 +32,9 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
   })
   const [tagInput, setTagInput] = useState("")
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [imageFiles, setImageFiles] = useState<File[]>([])
   const { isCreating } = useFeed()
+  const { uploadFiles, isUploading } = useFileUpload()
 
   const dicebearUrl = user.first_name
     ? `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(user.first_name)}`
@@ -55,46 +58,65 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files) {
-      const newImages: string[] = []
+      const newFiles = Array.from(files)
       const newImagePreviews: string[] = []
-      Array.from(files).forEach((file) => {
-        newImages.push(file.name) // Store file names
-        newImagePreviews.push(URL.createObjectURL(file)) // Create URL for preview
+      
+      newFiles.forEach((file) => {
+        newImagePreviews.push(URL.createObjectURL(file))
       })
-      setFormData({ ...formData, images: [...formData.images, ...newImages] })
+      
+      setImageFiles([...imageFiles, ...newFiles])
       setImagePreviews([...imagePreviews, ...newImagePreviews])
     }
   }
 
   const removeImage = (indexToRemove: number) => {
-    const updatedImages = [...formData.images]
-    updatedImages.splice(indexToRemove, 1)
+    const updatedFiles = [...imageFiles]
+    updatedFiles.splice(indexToRemove, 1)
     const updatedImagePreviews = [...imagePreviews]
     updatedImagePreviews.splice(indexToRemove, 1)
-    setFormData({ ...formData, images: updatedImages })
+    setImageFiles(updatedFiles)
     setImagePreviews(updatedImagePreviews)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsModalOpen(false)
-    const postData = {
-      title: formData.title,
-      description: formData.description,
-      images: formData.images,
-      category: formData.category,
-      tags: formData.tags,
+    
+    try {
+      // Upload images first if any
+      let imageUrls: string[] = []
+      if (imageFiles.length > 0) {
+        const uploadedUrls = await uploadFiles(imageFiles)
+        if (uploadedUrls) {
+          imageUrls = uploadedUrls
+        }
+      }
+
+      const postData = {
+        title: formData.title,
+        description: formData.description,
+        images: imageUrls,
+        category: formData.category,
+        tags: formData.tags,
+      }
+      
+      await onPostCreate(postData)
+      
+      // Reset form
+      setFormData({
+        title: "",
+        description: "",
+        images: [],
+        category: "",
+        tags: [],
+      })
+      setTagInput("")
+      setImagePreviews([])
+      setImageFiles([])
+      setIsModalOpen(false)
+    } catch (error) {
+      console.error("Error creating post:", error)
     }
-    await onPostCreate(postData)
-    setFormData({
-      title: "",
-      description: "",
-      images: [],
-      category: "",
-      tags: [],
-    })
-    setTagInput("")
-    setImagePreviews([])
   }
 
   return (
@@ -271,10 +293,10 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
               </Button>
               <Button
                 type="submit"
-                disabled={isCreating || !formData.title || !formData.description}
+                disabled={isCreating || isUploading || !formData.title || !formData.description}
                 className="h-8 px-3 text-xs"
               >
-                {isCreating ? "Creating..." : "Create Post"}
+                {isUploading ? "Uploading..." : isCreating ? "Creating..." : "Create Post"}
               </Button>
             </div>
           </form>

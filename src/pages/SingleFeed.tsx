@@ -1,11 +1,12 @@
 
 import React, { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Star, ChevronLeft, ChevronRight, Share2, MessageCircle, Check } from "lucide-react"
+import { ArrowLeft, Star, ChevronLeft, ChevronRight, Share2, MessageCircle, Check, MoreHorizontal, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ScoreModal } from "@/components/feed/ScoreModal"
 import { CommentModal } from "@/components/feed/CommentModal"
 import { ShareModal } from "@/components/feed/ShareModal"
@@ -21,7 +22,7 @@ export const SingleFeed: React.FC = () => {
   const [showShareModal, setShowShareModal] = useState(false)
   const [user, setUser] = useState<any>(null)
   
-  const { getPost, getSuggestedPostsByUser } = useFeed()
+  const { getPost, getSuggestedPostsByUser, deletePost } = useFeed()
   const { loggedInUser } = useAuth()
 
   // Fetch user data
@@ -88,15 +89,48 @@ export const SingleFeed: React.FC = () => {
     return score.toString()
   }
 
+  const handleDeletePost = async () => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      try {
+        await deletePost(postId || '')
+        navigate('/feed')
+      } catch (error) {
+        console.error("Error deleting post:", error)
+      }
+    }
+  }
+
+  // Check if current user is the post owner
+  const isOwner = user && post && user.user_id === post.user_id
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container mx-auto px-4 h-14 flex items-center">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate('/feed')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Feed
           </Button>
+          {/* Menu Dropdown - Only show for post owner */}
+          {isOwner && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 z-50">
+                <DropdownMenuItem 
+                  onClick={handleDeletePost}
+                  className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Post
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </header>
 

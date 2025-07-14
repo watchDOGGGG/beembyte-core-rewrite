@@ -2,13 +2,16 @@
 "use client"
 
 import React from "react"
-import { Heart, MessageCircle, Share2, Star, ChevronLeft, ChevronRight, Trash2, Check } from "lucide-react"
+import { Heart, MessageCircle, Share2, Star, ChevronLeft, ChevronRight, Trash2, Check, MoreHorizontal } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 import { ShareModal } from "./ShareModal"
 import { ScoreModal } from "./ScoreModal"
 import { useFeed } from "@/hooks/useFeed"
 import { useNavigate } from "react-router-dom"
+import { useAuth } from "@/hooks/useAuth"
 
 interface FeedPost {
   _id: string
@@ -56,6 +59,7 @@ interface FeedCardProps {
   onUnlike?: () => void
   onComment?: (content: string) => void
   onDeleteComment?: (commentId: string) => void
+  onDeletePost?: (postId: string) => void
   initialLiked?: boolean
 }
 
@@ -65,6 +69,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({
   onUnlike,
   onComment,
   onDeleteComment,
+  onDeletePost,
   initialLiked = false,
 }) => {
   const navigate = useNavigate()
@@ -78,9 +83,25 @@ export const FeedCard: React.FC<FeedCardProps> = ({
   const [currentPeopleCount, setCurrentPeopleCount] = React.useState(post.people_score_count)
   const [fetchedComments, setFetchedComments] = React.useState<any[]>([])
   const [commentsLoaded, setCommentsLoaded] = React.useState(false)
+  const [currentUser, setCurrentUser] = React.useState<any>(null)
 
   const { getPostComments } = useFeed()
+  const { loggedInUser } = useAuth()
+
   const commentsQuery = getPostComments(post._id)
+
+  // Fetch current user
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await loggedInUser()
+        setCurrentUser(userData)
+      } catch (error) {
+        console.error("Error fetching user:", error)
+      }
+    }
+    fetchUser()
+  }, [loggedInUser])
 
   // Load comments when showComments is true
   React.useEffect(() => {
@@ -126,11 +147,20 @@ export const FeedCard: React.FC<FeedCardProps> = ({
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Only navigate if not clicking on interactive elements
-    if ((e.target as HTMLElement).closest('button, a, input')) {
+    if ((e.target as HTMLElement).closest('button, a, input, [role="menu"], [role="menuitem"]')) {
       return
     }
     navigate(`/feed/${post._id}`)
   }
+
+  const handleDeletePost = () => {
+    if (onDeletePost && window.confirm("Are you sure you want to delete this post?")) {
+      onDeletePost(post._id)
+    }
+  }
+
+  // Check if current user is the post owner
+  const isOwner = currentUser && currentUser.user_id === post.user_id
 
   return (
     <>
@@ -191,6 +221,25 @@ export const FeedCard: React.FC<FeedCardProps> = ({
                 <span>{new Date(post.created_at).toLocaleDateString()}</span>
               </div>
             </div>
+            {/* Menu Dropdown - Only show for post owner */}
+            {isOwner && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 z-50">
+                  <DropdownMenuItem 
+                    onClick={handleDeletePost}
+                    className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Post
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 

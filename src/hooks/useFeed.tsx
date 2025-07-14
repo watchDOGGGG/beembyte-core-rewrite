@@ -343,6 +343,25 @@ export const useFeed = () => {
     },
   })
 
+  // Delete post mutation
+  const deletePostMutation = useMutation({
+    mutationFn: async (postId: string) => {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/feed/${postId}/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      if (!response.ok) throw new Error('Failed to delete post')
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['feed'] })
+    },
+  })
+
   // Comment on post mutation
   const commentPostMutation = useMutation({
     mutationFn: async ({ postId, payload }: { postId: string; payload: CommentPayload }) => {
@@ -377,6 +396,7 @@ export const useFeed = () => {
     unlikePost: unlikePostMutation.mutateAsync,
     commentOnPost: commentPostMutation.mutateAsync,
     deleteComment: deleteCommentMutation.mutateAsync,
+    deletePost: deletePostMutation.mutateAsync,
     isLoading: isLoading || createPostMutation.isPending,
     isCreating: createPostMutation.isPending,
   }

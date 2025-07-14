@@ -56,7 +56,7 @@ const Feed = () => {
   const [user, setUser] = useState<User | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("all")
-  const { getFeedPosts, createPost, likePost, unlikePost, commentOnPost, deleteComment } = useFeed()
+  const { getFeedPosts, createPost, likePost, unlikePost, commentOnPost, deleteComment, deletePost } = useFeed()
 
   // Fetch feed posts from API
   const { data: feedData, isLoading: feedLoading, error: feedError } = getFeedPosts(1, 10)
@@ -146,6 +146,14 @@ const Feed = () => {
       await deleteComment(commentId)
     } catch (error) {
       console.error("Error deleting comment:", error)
+    }
+  }
+
+  const handleDeletePost = async (postId: string) => {
+    try {
+      await deletePost(postId)
+    } catch (error) {
+      console.error("Error deleting post:", error)
     }
   }
 
@@ -257,6 +265,7 @@ const Feed = () => {
                           onUnlike={() => handleUnlike(post._id)}
                           onComment={(content) => handleComment(post._id, content)}
                           onDeleteComment={handleDeleteComment}
+                          onDeletePost={handleDeletePost}
                           initialLiked={post.has_scored}
                         />
                       ))
@@ -274,6 +283,7 @@ const Feed = () => {
                           onUnlike={() => handleUnlike(post._id)}
                           onComment={(content) => handleComment(post._id, content)}
                           onDeleteComment={handleDeleteComment}
+                          onDeletePost={handleDeletePost}
                           initialLiked={post.has_scored}
                         />
                       ))}
@@ -295,6 +305,7 @@ const Feed = () => {
                           onUnlike={() => handleUnlike(post._id)}
                           onComment={(content) => handleComment(post._id, content)}
                           onDeleteComment={handleDeleteComment}
+                          onDeletePost={handleDeletePost}
                           initialLiked={post.has_scored}
                         />
                       ))}
@@ -311,6 +322,7 @@ const Feed = () => {
                           onUnlike={() => handleUnlike(post._id)}
                           onComment={(content) => handleComment(post._id, content)}
                           onDeleteComment={handleDeleteComment}
+                          onDeletePost={handleDeletePost}
                           initialLiked={post.has_scored}
                         />
                       ))}

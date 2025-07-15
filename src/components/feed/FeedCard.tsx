@@ -266,17 +266,17 @@ export const FeedCard: React.FC<FeedCardProps> = ({
           )}
         </div>
 
-        {/* Images Carousel - Full Width with Controlled Height */}
+        {/* Images Carousel - Full Width Natural Height */}
         {post.images.length > 0 && (
           <div className="relative w-full">
-            <div className="w-full max-h-96 overflow-hidden">
+            <div className="w-full overflow-hidden">
               <div className="flex transition-transform duration-300 ease-in-out" style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}>
                 {post.images.map((image, index) => (
                   <img
                     key={index}
                     src={image || "/placeholder.svg"}
                     alt={`${post.title} - Image ${index + 1}`}
-                    className="w-full max-h-96 object-cover flex-shrink-0"
+                    className="w-full h-auto object-contain flex-shrink-0"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement
                       target.src = "/placeholder.svg?height=400&width=400"

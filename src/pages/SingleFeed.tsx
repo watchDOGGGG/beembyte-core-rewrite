@@ -141,14 +141,14 @@ export const SingleFeed: React.FC = () => {
             {/* Post Images */}
             {post.images && post.images.length > 0 && (
               <div className="relative">
-                <div className="bg-muted rounded-lg overflow-hidden max-h-96">
+                <div className="bg-muted rounded-lg overflow-hidden">
                   <div className="flex transition-transform duration-300 ease-in-out" style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}>
                     {post.images.map((image, index) => (
                       <img
                         key={index}
                         src={image}
                         alt={`${post.title} - Image ${index + 1}`}
-                        className="w-full max-h-96 object-cover flex-shrink-0"
+                        className="w-full h-auto object-contain flex-shrink-0"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
                           target.src = "/placeholder.svg"

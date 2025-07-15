@@ -21,7 +21,7 @@ export const SingleFeed: React.FC = () => {
   const [showCommentModal, setShowCommentModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [user, setUser] = useState<any>(null)
-  
+
   const { getPost, getSuggestedPostsByUser, deletePost } = useFeed()
   const { loggedInUser } = useAuth()
 
@@ -56,7 +56,7 @@ export const SingleFeed: React.FC = () => {
 
   // Fetch suggested posts if we have post data - pass the actual user_id
   const { data: suggestedPosts = [], isLoading: isLoadingSuggested } = getSuggestedPostsByUser(
-    postId || '', 
+    postId || '',
     post?.user_id || ''
   )
 
@@ -121,7 +121,7 @@ export const SingleFeed: React.FC = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 z-50">
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={handleDeletePost}
                   className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
@@ -152,7 +152,7 @@ export const SingleFeed: React.FC = () => {
                     }}
                   />
                 </div>
-                
+
                 {/* Image Navigation */}
                 {post.images.length > 1 && (
                   <>
@@ -160,7 +160,7 @@ export const SingleFeed: React.FC = () => {
                       variant="secondary"
                       size="sm"
                       className="absolute left-4 top-1/2 -translate-y-1/2"
-                      onClick={() => setCurrentImageIndex(prev => 
+                      onClick={() => setCurrentImageIndex(prev =>
                         prev === 0 ? post.images.length - 1 : prev - 1
                       )}
                     >
@@ -170,22 +170,21 @@ export const SingleFeed: React.FC = () => {
                       variant="secondary"
                       size="sm"
                       className="absolute right-4 top-1/2 -translate-y-1/2"
-                      onClick={() => setCurrentImageIndex(prev => 
+                      onClick={() => setCurrentImageIndex(prev =>
                         prev === post.images.length - 1 ? 0 : prev + 1
                       )}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
-                    
+
                     {/* Image Indicators */}
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
                       {post.images.map((_, index) => (
                         <button
                           key={index}
                           onClick={() => setCurrentImageIndex(index)}
-                          className={`w-2 h-2 rounded-full transition-colors ${
-                            index === currentImageIndex ? "bg-white" : "bg-white/50"
-                          }`}
+                          className={`w-2 h-2 rounded-full transition-colors ${index === currentImageIndex ? "bg-white" : "bg-white/50"
+                            }`}
                         />
                       ))}
                     </div>
@@ -197,7 +196,7 @@ export const SingleFeed: React.FC = () => {
             {/* Post Content */}
             <div className="space-y-4">
               <h1 className="text-xl font-bold text-foreground" style={{ fontSize: '18px' }}>{post.title}</h1>
-              
+
               <p className="text-muted-foreground leading-relaxed" style={{ fontSize: '14px' }}>
                 {post.description}
               </p>
@@ -215,37 +214,37 @@ export const SingleFeed: React.FC = () => {
 
               {/* Actions */}
               <div className="flex items-center space-x-4 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowScoreModal(true)}
-                  className="flex items-center space-x-2"
-                  style={{ fontSize: '12px' }}
-                >
-                  <Star className={`h-4 w-4 ${post.has_scored ? "fill-red-500 text-red-500" : ""}`} />
-                  <span>
-                    {post.people_score_count || 0} people • score {formatScore(post.total_score)}
-                  </span>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="flex items-center space-x-2"
-                  onClick={() => setShowCommentModal(true)}
-                  style={{ fontSize: '12px' }}
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  <span>{post.comments_count} comments</span>
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="flex items-center space-x-2"
-                  onClick={() => setShowShareModal(true)}
-                  style={{ fontSize: '12px' }}
-                >
-                  <Share2 className="h-4 w-4" />
-                  <span>Share</span>
-                </Button>
+                <div className="flex flex-wrap w-full gap-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowScoreModal(true)}
+                    className="flex items-center gap-1 text-xs min-w-0"
+                  >
+                    <Star className={`h-4 w-4 ${post.has_scored ? "fill-red-500 text-red-500" : ""}`} />
+                    <span className="truncate">
+                      {post.people_score_count || 0} people • score {formatScore(post.total_score)}
+                    </span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCommentModal(true)}
+                    className="flex items-center gap-1 text-xs min-w-0"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span className="truncate">{post.comments_count} comments</span>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowShareModal(true)}
+                    className="flex items-center gap-1 text-xs min-w-0"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    <span className="truncate">Share</span>
+                  </Button>
+                </div>
+
               </div>
             </div>
           </div>
@@ -282,10 +281,10 @@ export const SingleFeed: React.FC = () => {
                           {post.user.responder_info.job_title}
                         </p>
                         {post.user.responder_info.rank_status && (
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className="capitalize"
-                            style={{ 
+                            style={{
                               fontSize: '12px',
                               backgroundColor: post.user.responder_info.rank_status.rank_color + '20',
                               borderColor: post.user.responder_info.rank_status.rank_color,

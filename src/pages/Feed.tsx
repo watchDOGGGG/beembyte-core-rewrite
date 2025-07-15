@@ -206,7 +206,7 @@ const Feed = () => {
                   <Search className="absolute left-7 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
                   <Input
                     type="text"
-                    placeholder="Search projects, skills, or categories..."
+                    placeholder="Search feed title or content...."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-8 pr-4 py-1.5 text-xs w-full"
@@ -235,10 +235,10 @@ const Feed = () => {
                       All
                     </TabsTrigger>
                     <TabsTrigger value="design" className="text-xs">
-                      Design
+                      Projects
                     </TabsTrigger>
                     <TabsTrigger value="development" className="text-xs">
-                      Dev
+                      Jobs
                     </TabsTrigger>
                     <TabsTrigger value="trending" className="text-xs">
                       <TrendingUp className="h-3 w-3" />

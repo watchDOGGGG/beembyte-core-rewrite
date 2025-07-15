@@ -101,7 +101,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({
       }
     }
     fetchUser()
-  }, [loggedInUser])
+  }, [])
 
   // Load comments when showComments is true
   React.useEffect(() => {
@@ -165,7 +165,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({
   return (
     <>
       {/* Full Width Card - Instagram Style */}
-      <div 
+      <div
         className="bg-white dark:bg-gray-800 border-0 border-b border-gray-200 dark:border-gray-700 w-full mb-0 cursor-pointer"
         onClick={handleCardClick}
       >
@@ -194,9 +194,9 @@ export const FeedCard: React.FC<FeedCardProps> = ({
                   </>
                 )}
                 {post.user.responder_info?.rank_status && (
-                  <span 
+                  <span
                     className="text-xs capitalize px-1.5 py-0.5 rounded-full"
-                    style={{ 
+                    style={{
                       fontSize: '12px',
                       backgroundColor: post.user.responder_info.rank_status.rank_color + '20',
                       color: post.user.responder_info.rank_status.rank_color
@@ -230,7 +230,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 z-50">
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={handleDeletePost}
                     className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
@@ -419,7 +419,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({
           )}
         </div>
       </div>
-      <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} post={{...post, id: post._id}} />
+      <ShareModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} post={{ ...post, id: post._id }} />
       <ScoreModal
         isOpen={showScoreModal}
         onClose={() => setShowScoreModal(false)}

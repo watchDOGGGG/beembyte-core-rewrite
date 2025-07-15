@@ -266,14 +266,14 @@ export const FeedCard: React.FC<FeedCardProps> = ({
           )}
         </div>
 
-        {/* Images Carousel - Full Width Instagram Square Aspect Ratio */}
+        {/* Images Carousel - Full Width with Natural Height */}
         {post.images.length > 0 && (
           <div className="relative w-full">
-            <div className="aspect-square w-full overflow-hidden">
+            <div className="w-full overflow-hidden">
               <img
                 src={post.images[currentImageIndex] || "/placeholder.svg"}
                 alt={`${post.title} - Image ${currentImageIndex + 1}`}
-                className={`w-full h-full object-cover transition-all duration-300 ${isTransitioning ? "opacity-0 scale-105" : "opacity-100 scale-100"
+                className={`w-full h-auto object-contain transition-all duration-300 ${isTransitioning ? "opacity-0 scale-105" : "opacity-100 scale-100"
                   }`}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement

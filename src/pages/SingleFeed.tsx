@@ -141,49 +141,50 @@ export const SingleFeed: React.FC = () => {
             {/* Post Images */}
             {post.images && post.images.length > 0 && (
               <div className="relative">
-                <div className="bg-muted rounded-lg overflow-hidden">
-                  <img
-                    src={post.images[currentImageIndex]}
-                    alt={`${post.title} - Image ${currentImageIndex + 1}`}
-                    className="w-full h-auto object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.src = "/placeholder.svg"
-                    }}
-                  />
+                <div className="bg-muted rounded-lg overflow-hidden max-h-96">
+                  <div className="flex transition-transform duration-300 ease-in-out" style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}>
+                    {post.images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image}
+                        alt={`${post.title} - Image ${index + 1}`}
+                        className="w-full max-h-96 object-cover flex-shrink-0"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.src = "/placeholder.svg"
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 {/* Image Navigation */}
                 {post.images.length > 1 && (
                   <>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="absolute left-4 top-1/2 -translate-y-1/2"
-                      onClick={() => setCurrentImageIndex(prev =>
-                        prev === 0 ? post.images.length - 1 : prev - 1
-                      )}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="absolute right-4 top-1/2 -translate-y-1/2"
-                      onClick={() => setCurrentImageIndex(prev =>
-                        prev === post.images.length - 1 ? 0 : prev + 1
-                      )}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+                    {currentImageIndex > 0 && (
+                      <button
+                        onClick={() => setCurrentImageIndex(prev => prev - 1)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
+                      >
+                        <ChevronLeft className="h-3 w-3" />
+                      </button>
+                    )}
+                    {currentImageIndex < post.images.length - 1 && (
+                      <button
+                        onClick={() => setCurrentImageIndex(prev => prev + 1)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
+                      >
+                        <ChevronRight className="h-3 w-3" />
+                      </button>
+                    )}
 
                     {/* Image Indicators */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
                       {post.images.map((_, index) => (
                         <button
                           key={index}
                           onClick={() => setCurrentImageIndex(index)}
-                          className={`w-2 h-2 rounded-full transition-colors ${index === currentImageIndex ? "bg-white" : "bg-white/50"
+                          className={`w-1.5 h-1.5 rounded-full transition-colors ${index === currentImageIndex ? "bg-white" : "bg-white/50"
                             }`}
                         />
                       ))}

@@ -266,36 +266,44 @@ export const FeedCard: React.FC<FeedCardProps> = ({
           )}
         </div>
 
-        {/* Images Carousel - Full Width with Natural Height */}
+        {/* Images Carousel - Full Width with Controlled Height */}
         {post.images.length > 0 && (
           <div className="relative w-full">
-            <div className="w-full overflow-hidden">
-              <img
-                src={post.images[currentImageIndex] || "/placeholder.svg"}
-                alt={`${post.title} - Image ${currentImageIndex + 1}`}
-                className={`w-full h-auto object-contain transition-all duration-300 ${isTransitioning ? "opacity-0 scale-105" : "opacity-100 scale-100"
-                  }`}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.src = "/placeholder.svg?height=400&width=400"
-                }}
-              />
+            <div className="w-full max-h-96 overflow-hidden">
+              <div className="flex transition-transform duration-300 ease-in-out" style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}>
+                {post.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image || "/placeholder.svg"}
+                    alt={`${post.title} - Image ${index + 1}`}
+                    className="w-full max-h-96 object-cover flex-shrink-0"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.src = "/placeholder.svg?height=400&width=400"
+                    }}
+                  />
+                ))}
+              </div>
             </div>
             {/* Image Navigation */}
             {post.images.length > 1 && (
               <>
-                <button
-                  onClick={handlePrevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
-                >
-                  <ChevronLeft className="h-3 w-3" />
-                </button>
-                <button
-                  onClick={handleNextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
-                >
-                  <ChevronRight className="h-3 w-3" />
-                </button>
+                {currentImageIndex > 0 && (
+                  <button
+                    onClick={handlePrevImage}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
+                  >
+                    <ChevronLeft className="h-3 w-3" />
+                  </button>
+                )}
+                {currentImageIndex < post.images.length - 1 && (
+                  <button
+                    onClick={handleNextImage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
+                  >
+                    <ChevronRight className="h-3 w-3" />
+                  </button>
+                )}
                 {/* Image Indicators */}
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
                   {post.images.map((_, index) => (

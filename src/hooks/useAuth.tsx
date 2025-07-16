@@ -188,16 +188,9 @@ export const useAuth = () => {
 
   const verifyAuthToken = async () => {
     try {
-      const auth_token = getCookie('authToken');
 
-      // If no token exists, don't make API call
-      if (!auth_token) {
-        console.log("No auth token found")
-        navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
-        return
-      }
 
-      const response = await authApi.verifyAuthToken(auth_token)
+      const response = await authApi.verifyAuthToken()
       if (!response.success) {
         // Clear invalid token and redirect
         authApi.logout()

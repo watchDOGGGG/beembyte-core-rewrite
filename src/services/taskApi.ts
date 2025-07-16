@@ -299,9 +299,9 @@ export const taskApi = {
       const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/tasks/most-recent-task`, {
         method: "GET",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
 

@@ -1,4 +1,3 @@
-
 import { API_BASE_URL } from "../config/env";
 
 interface FieldError {
@@ -83,20 +82,22 @@ const getForgotPasswordData = () => {
   const getCookie = (name: string) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop()?.split(';').shift();
+    if (parts.length === 2) return parts.pop()?.split(";").shift();
     return null;
   };
 
   return {
-    userId: getCookie('forgotPasswordUserId'),
-    code: getCookie('forgotPasswordCode')
+    userId: getCookie("forgotPasswordUserId"),
+    code: getCookie("forgotPasswordCode"),
   };
 };
 
 // Clear forgot password cookies
 const clearForgotPasswordCookies = () => {
-  document.cookie = "forgotPasswordUserId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  document.cookie = "forgotPasswordCode=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  document.cookie =
+    "forgotPasswordUserId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  document.cookie =
+    "forgotPasswordCode=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 };
 
 // Authentication API service
@@ -132,6 +133,7 @@ export const authApi = {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(credentials),
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -204,7 +206,9 @@ export const authApi = {
   },
 
   // Forgot password - send email
-  forgotPassword: async (forgotData: ForgotPasswordRequest): Promise<AuthResponse> => {
+  forgotPassword: async (
+    forgotData: ForgotPasswordRequest
+  ): Promise<AuthResponse> => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/forgot-password`, {
         method: "POST",
@@ -237,25 +241,27 @@ export const authApi = {
       });
 
       const data = await response.json();
-      
+
       // Store user_id and code for password reset
       if (data.success && data.data?.user_id) {
         setForgotPasswordCookie(data.data.user_id, otpData.code);
       }
-      
+
       return data;
     } catch (error) {
       console.error("OTP verification error:", error);
       return {
         success: false,
         message: "Failed to verify OTP. Please try again later.",
-        data: { email: "", user_id: "" }
+        data: { email: "", user_id: "" },
       };
     }
   },
 
   // Reset password
-  resetPassword: async (resetData: ResetPasswordRequest): Promise<AuthResponse> => {
+  resetPassword: async (
+    resetData: ResetPasswordRequest
+  ): Promise<AuthResponse> => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/reset-password`, {
         method: "POST",
@@ -266,12 +272,12 @@ export const authApi = {
       });
 
       const data = await response.json();
-      
+
       // Clear forgot password cookies after successful reset
       if (data.success) {
         clearForgotPasswordCookies();
       }
-      
+
       return data;
     } catch (error) {
       console.error("Reset password error:", error);
@@ -296,17 +302,15 @@ export const authApi = {
     clearForgotPasswordCookies();
   },
 
-  verifyAuthToken: async (auth_token: string) => {
+  verifyAuthToken: async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/users/verify-authToken/${auth_token}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users/verify-auth-token`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
 
       // Don't try to parse response if request failed
       if (!response.ok) {

@@ -283,8 +283,24 @@ export const authApi = {
   clearForgotPasswordCookies,
 
   // Logout user - cookies are cleared by server
-  logout: () => {
-    clearForgotPasswordCookies();
+  logout: async (): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/logout`, {
+        method: "POST",
+        credentials: "include", // Required to send cookies
+      });
+
+      const data = await response.json();
+      clearForgotPasswordCookies();
+      return data;
+    } catch (error) {
+      console.error("Logout error:", error);
+      clearForgotPasswordCookies();
+      return {
+        success: false,
+        message: "Logout failed. Please try again.",
+      };
+    }
   },
 
   verifyAuthToken: async () => {

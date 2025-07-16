@@ -171,7 +171,7 @@ export const useAuth = () => {
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
     // Disconnect socket before logout
     try {
       socketService.disconnect()
@@ -180,10 +180,20 @@ export const useAuth = () => {
       // Don't block logout due to socket issues
     }
 
-    authApi.logout()
+    try {
+      const response = await authApi.logout()
+      if (response.success) {
+        toast.success(response.message || "Successfully logged out")
+      } else {
+        toast.error(response.message || "Logout failed")
+      }
+    } catch (error) {
+      console.error("Logout error:", error)
+      toast.error("An error occurred during logout")
+    }
+
     setUser(null)
     navigate("/login")
-    toast.success("Successfully logged out")
   }
 
   const verifyAuthToken = async () => {

@@ -2,6 +2,7 @@
 import React, { useState } from "react"
 import { FeedCard } from "@/components/feed/FeedCard"
 import { CreatePostCard } from "@/components/feed/CreatePostCard"
+import { SpeedDial } from "@/components/feed/SpeedDial"
 import { WeeklyTopResponders } from "@/components/feed/WeeklyTopResponders"
 import { TrendingCategories } from "@/components/feed/TrendingCategories"
 import { useAuth } from "@/hooks/useAuth"
@@ -342,6 +343,9 @@ const Feed = () => {
             </div>
           </div>
         </main>
+        
+        {/* Speed Dial Component */}
+        <SpeedDial onPostCreate={handlePostCreate} />
       </div>
     </div>
   )

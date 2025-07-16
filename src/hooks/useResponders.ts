@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { API_BASE_URL } from "@/config/env";
-import { getCookie } from "@/utils/formatUtils";
 
 interface Responder {
   user_id: string;
@@ -25,7 +24,7 @@ export const useResponders = () => {
 
     setIsSearching(true);
     try {
-      const authToken = getCookie("authToken");
+      // Using credentials include instead
 
       const response = await fetch(
         `${API_BASE_URL}/users/search-responders?q=${encodeURIComponent(
@@ -33,9 +32,9 @@ export const useResponders = () => {
         )}`,
         {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
           },
         }
       );
@@ -61,7 +60,7 @@ export const useResponders = () => {
 
   const getResponderById = async (identifier: string) => {
     try {
-      const authToken = getCookie("authToken");
+      // Using credentials include instead
 
       const response = await fetch(
         `${API_BASE_URL}/users/get-responoder?identifier=${encodeURIComponent(
@@ -69,9 +68,9 @@ export const useResponders = () => {
         )}`,
         {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
           },
         }
       );

@@ -43,9 +43,7 @@ export const useFileUpload = () => {
           `${API_HOST_ADDRESS}/api/upload/multiple`,
           {
             method: "POST",
-            headers: {
-              ...(token && { Authorization: `Bearer ${token}` }),
-            },
+            credentials: "include",
             body: formData,
           }
         );

@@ -1,5 +1,4 @@
 import { API_BASE_URL } from "@/config/env";
-import { getCookie } from "@/utils/formatUtils";
 
 export enum TRANSACTION_TYPE {
   FUNDING = "funding",
@@ -80,14 +79,6 @@ export interface TransactionHistoryParams {
 }
 
 class WalletTransactionApiService {
-  private getAuthHeaders() {
-    const token = getCookie("authToken");
-    return {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    };
-  }
-
   async createTransactionRecord(
     payload: CreateTransactionRecordPayload
   ): Promise<CreateTransactionRecordResponse> {
@@ -98,7 +89,10 @@ class WalletTransactionApiService {
         `${API_BASE_URL}/wallet-transactions/create-record`,
         {
           method: "POST",
-          headers: this.getAuthHeaders(),
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(payload),
         }
       );
@@ -134,7 +128,10 @@ class WalletTransactionApiService {
 
       const response = await fetch(url, {
         method: "GET",
-        headers: this.getAuthHeaders(),
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {

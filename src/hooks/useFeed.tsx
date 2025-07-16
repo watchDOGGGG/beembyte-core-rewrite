@@ -123,10 +123,9 @@ export const useFeed = () => {
     return useQuery({
       queryKey: ['feed', page, limit],
       queryFn: async () => {
-        const token = getAuthToken();
         const response = await fetch(`${API_BASE_URL}/feed/all-posts?page=${page}&limit=${limit}`, {
+          credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         })
@@ -148,10 +147,9 @@ export const useFeed = () => {
     return useQuery({
       queryKey: ['post', postId],
       queryFn: async () => {
-        const token = getAuthToken();
         const response = await fetch(`${API_BASE_URL}/feed/${postId}`, {
+          credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         })
@@ -166,10 +164,9 @@ export const useFeed = () => {
     return useQuery({
       queryKey: ['comments', postId],
       queryFn: async () => {
-        const token = getAuthToken();
         const response = await fetch(`${API_BASE_URL}/feed/${postId}/comments`, {
+          credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         })
@@ -185,10 +182,9 @@ export const useFeed = () => {
     return useQuery({
       queryKey: ['people-scored', postId],
       queryFn: async () => {
-        const token = getAuthToken();
         const response = await fetch(`${API_BASE_URL}/feed/get-people-scored/${postId}`, {
+          credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         })
@@ -204,10 +200,9 @@ export const useFeed = () => {
     return useQuery({
       queryKey: ['suggested-posts', postId, userId],
       queryFn: async () => {
-        const token = getAuthToken();
         const response = await fetch(`${API_BASE_URL}/feed/${postId}/${userId}/suggested-post-by-user`, {
+          credentials: 'include',
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         })
@@ -221,11 +216,10 @@ export const useFeed = () => {
   // Delete comment mutation
   const deleteCommentMutation = useMutation({
     mutationFn: async (commentId: string) => {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/feed/comments/${commentId}`, {
         method: 'DELETE',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       })
@@ -242,11 +236,10 @@ export const useFeed = () => {
   const createPostMutation = useMutation({
     mutationFn: async (payload: CreatePostPayload) => {
       setIsLoading(true)
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/feed/create-post`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
@@ -263,11 +256,10 @@ export const useFeed = () => {
   // Score post mutation
   const scorePostMutation = useMutation({
     mutationFn: async ({ postId, payload }: { postId: string; payload: ScorePayload }) => {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/feed/${postId}/score`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
@@ -285,11 +277,10 @@ export const useFeed = () => {
   // Unscore post mutation
   const unscorePostMutation = useMutation({
     mutationFn: async (postId: string) => {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/feed/${postId}/unscore`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       })
@@ -306,11 +297,10 @@ export const useFeed = () => {
   // Like post mutation (keeping for backward compatibility)
   const likePostMutation = useMutation({
     mutationFn: async (postId: string) => {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/feed/${postId}/like`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       })
@@ -326,11 +316,10 @@ export const useFeed = () => {
   // Unlike post mutation (keeping for backward compatibility)
   const unlikePostMutation = useMutation({
     mutationFn: async (postId: string) => {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/feed/${postId}/unlike`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       })
@@ -346,11 +335,10 @@ export const useFeed = () => {
   // Delete post mutation
   const deletePostMutation = useMutation({
     mutationFn: async (postId: string) => {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/feed/${postId}/delete`, {
         method: 'DELETE',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       })
@@ -365,11 +353,10 @@ export const useFeed = () => {
   // Comment on post mutation
   const commentPostMutation = useMutation({
     mutationFn: async ({ postId, payload }: { postId: string; payload: CommentPayload }) => {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/feed/${postId}/comments`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),

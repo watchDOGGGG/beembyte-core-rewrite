@@ -61,7 +61,7 @@ export const useAuth = () => {
 
         const { auth_token, user } = response.data
         // Token is now stored in cookie by the authApi.login function
-        localStorage.setItem("authorizeUser", JSON.stringify(user))
+        // User data is now stored in HTTP-only cookies
 
         // Ensure user is valid before setting it
         if (user) {

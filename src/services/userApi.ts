@@ -1,6 +1,5 @@
 
 import { API_BASE_URL } from '@/config/env';
-import { getCookie } from '@/utils/formatUtils';
 
 export interface UserProfileResponse {
   success: boolean;
@@ -43,19 +42,14 @@ export interface ChangePasswordResponse {
 }
 
 class UserApiService {
-  private getAuthHeaders() {
-    const token = getCookie('authToken');
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    };
-  }
-
   async getUserProfile(): Promise<UserProfileResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/users/user-profile`, {
         method: 'GET',
-        headers: this.getAuthHeaders(),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) {
@@ -74,7 +68,10 @@ class UserApiService {
     try {
       const response = await fetch(`${API_BASE_URL}/users/change-password`, {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(data),
       });
 

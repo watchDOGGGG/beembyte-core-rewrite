@@ -276,7 +276,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({
                     key={index}
                     src={image || "/placeholder.svg"}
                     alt={`${post.title} - Image ${index + 1}`}
-                    className="w-full h-auto object-contain flex-shrink-0"
+                    className="w-full h-96 object-cover flex-shrink-0"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement
                       target.src = "/placeholder.svg?height=400&width=400"

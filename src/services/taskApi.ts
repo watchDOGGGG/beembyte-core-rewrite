@@ -139,13 +139,7 @@ export interface DeleteMessageResponse {
   data: null;
 }
 
-// Get authentication token from cookies
-const getAuthToken = () => {
-  return document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("authToken="))
-    ?.split("=")[1];
-};
+// No longer using token-based auth - using credentials include
 
 export const taskApi = {
   // Estimate task price
@@ -153,15 +147,13 @@ export const taskApi = {
     taskData: EstimateTaskRequest
   ): Promise<EstimateTaskResponse> => {
     try {
-      const token = getAuthToken();
-
       const response = await fetch(
         `${API_BASE_URL}/tasks/estimate-payment-price`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(taskData),
         }
@@ -184,12 +176,11 @@ export const taskApi = {
     taskData: CreateTaskRequest
   ): Promise<CreateTaskResponse> => {
     try {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/tasks/create`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(taskData),
       });
@@ -219,8 +210,6 @@ export const taskApi = {
     params?: TaskHistoryQueryParams
   ): Promise<TaskHistoryResponse> => {
     try {
-      const token = getAuthToken();
-
       // Build query string from params
       let queryString = "";
       if (params) {
@@ -238,9 +227,9 @@ export const taskApi = {
 
       const response = await fetch(url, {
         method: "GET",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -257,19 +246,17 @@ export const taskApi = {
 
   getTaskById: async (task_id: string): Promise<SingleTaskResponse> => {
     try {
-      const token = getAuthToken();
       console.log("Fetching task with ID:", task_id);
       console.log("API_BASE_URL:", API_BASE_URL);
-      console.log("Auth token exists:", !!token);
 
       const url = `${API_BASE_URL}/tasks/findOne?task_id=${task_id}`;
       console.log("Request URL:", url);
 
       const response = await fetch(url, {
         method: "GET",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
         },
       });
 
@@ -296,7 +283,6 @@ export const taskApi = {
 
   getMostRecentTasks: async (): Promise<RecentTasks> => {
     try {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/tasks/most-recent-task`, {
         method: "GET",
         credentials: "include",
@@ -319,14 +305,13 @@ export const taskApi = {
 
   getDashboardStats: async (): Promise<DashboardStats> => {
     try {
-      const token = getAuthToken();
       const response = await fetch(
         `${API_BASE_URL}/tasks/dashboard-analytics`,
         {
           method: "GET",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -346,14 +331,13 @@ export const taskApi = {
     task_id: string
   ): Promise<ApproveTaskResponse> => {
     try {
-      const token = getAuthToken();
       const url = `${API_BASE_URL}/tasks/accept-submitted-task/${task_id}`;
 
       const response = await fetch(url, {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -374,12 +358,11 @@ export const taskApi = {
     messageData: SendMessageRequest
   ): Promise<SendMessageResponse> => {
     try {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/users/chat/send-message`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(messageData),
       });
@@ -397,12 +380,11 @@ export const taskApi = {
   // Get all chat messages for a task
   getMessages: async (taskId: string): Promise<GetMessagesResponse> => {
     try {
-      const token = getAuthToken();
       const response = await fetch(`${API_BASE_URL}/users/chat/${taskId}`, {
         method: "GET",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
       return await response.json();
@@ -419,14 +401,13 @@ export const taskApi = {
   // Delete a chat message
   deleteMessage: async (messageId: string): Promise<DeleteMessageResponse> => {
     try {
-      const token = getAuthToken();
       const response = await fetch(
         `${API_BASE_URL}/users/chat/delete/${messageId}`,
         {
           method: "DELETE",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         }
       );

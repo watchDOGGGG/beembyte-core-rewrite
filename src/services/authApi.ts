@@ -61,13 +61,7 @@ export interface VerifyOtpResponse {
   success: boolean;
 }
 
-// Set cookie with token
-const setAuthCookie = (token: string) => {
-  // Set cookie to expire in 30 days
-  const expiryDate = new Date();
-  expiryDate.setDate(expiryDate.getDate() + 30);
-  document.cookie = `authToken=${token}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Strict`;
-};
+// No longer using cookie storage - using credentials include
 
 // Set forgot password data in cookie
 const setForgotPasswordCookie = (userId: string, code: string) => {
@@ -137,12 +131,6 @@ export const authApi = {
       });
 
       const data = await response.json();
-
-      // If login successful, store the token in a cookie
-      if (data.success && data.data?.auth_token) {
-        setAuthCookie(data.data.auth_token);
-      }
-
       return data;
     } catch (error) {
       console.error("Login error:", error);
@@ -294,11 +282,8 @@ export const authApi = {
   // Clear forgot password data
   clearForgotPasswordCookies,
 
-  // Logout user and clear cookie
+  // Logout user - cookies are cleared by server
   logout: () => {
-    document.cookie =
-      "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    localStorage.removeItem("authorizeUser");
     clearForgotPasswordCookies();
   },
 

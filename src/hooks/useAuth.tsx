@@ -205,13 +205,58 @@ export const useAuth = () => {
     }
   }
 
-  const googleLogin = async () => {
+  const googleLogin = async (token: string) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      console.log("🔐 Starting Google login process...");
-      
-      // Redirect to Google OAuth
-      await authApi.googleLogin();
+      console.log("🔐 Starting Google login with token...");
+      const response = await authApi.googleLogin(token);
+
+      if (response.success) {
+        const successMessage = typeof response.message === 'string' ? response.message : "Google login successful!"
+        toast.success(successMessage);
+
+        const { auth_token, user } = response.data;
+        console.log("🔐 Google login data received:", { hasToken: !!auth_token, hasUser: !!user });
+
+        if (user) {
+          console.log("🔐 Setting user in context:", user.user_id);
+          setUser(user as User);
+
+          // Connect to socket after successful login
+          if (user.user_id && user.role) {
+            try {
+              socketService.connect(user.user_id, user.role);
+              
+              socket.on("connect_error", (error) => {
+                console.error("Socket connection error:", error);
+                toast.error("Could not establish live connection. Some features may be limited.");
+              });
+            } catch (socketError) {
+              console.error("Socket connection error:", socketError);
+              toast.error("Could not establish live connection. Some features may be limited.");
+            }
+          }
+
+          // Notify other tabs of auth change
+          notifyAuthChange();
+          
+          // Navigate to home after successful login
+          setTimeout(() => {
+            console.log("🔐 Google Auth successful, navigating to home page...");
+            navigate("/");
+          }, 200);
+        } else {
+          console.error("🔐 No user data received from Google login response");
+          toast.error("Login failed. No user data received.");
+        }
+      } else {
+        console.log("🔐 Google login failed:", response.message);
+        const errorResponse = {
+          ...response,
+          message: typeof response.message === 'string' ? response.message : response.message?.message || "Google login failed"
+        };
+        handleApiErrors(errorResponse);
+      }
     } catch (error) {
       console.error("🔐 Google login error:", error);
       toast.error("Google login failed. Please try again.");

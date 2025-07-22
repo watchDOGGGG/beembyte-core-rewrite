@@ -243,17 +243,59 @@ export const authApi = {
     }
   },
 
-  // Google OAuth login
-  googleLogin: async (): Promise<void> => {
+  // Google OAuth login with token
+  googleLogin: async (token: string): Promise<AuthResponse> => {
     try {
-      // Redirect to Google OAuth endpoint
-      window.location.href = `${API_BASE_URL}/auth/google`;
+      console.log("🌐 Making Google login request to:", `${API_BASE_URL}/users/google-login`);
+      
+      const response = await fetch(`${API_BASE_URL}/users/google-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+        credentials: "include",
+      });
+
+      console.log("🌐 Google login response status:", response.status);
+      console.log("🌐 Google login response headers:", Object.fromEntries(response.headers.entries()));
+      
+      const data = await response.json();
+      console.log("🌐 Google login response data:", { success: data.success, hasData: !!data.data, hasToken: !!data.data?.auth_token });
+
+      // Check if cookies are set after login
+      if (data.success) {
+        console.log("🍪 Document cookies immediately after Google login:", document.cookie);
+        
+        // Check if server set the auth cookie
+        const hasAuthCookie = document.cookie.includes('authToken=');
+        console.log("🍪 Auth cookie present after server response:", hasAuthCookie);
+        
+        // If server didn't set cookie but we have a token, set it manually
+        if (!hasAuthCookie && data.data?.auth_token) {
+          console.log("🍪 Server didn't set cookie, setting manually...");
+          setAuthTokenManually(data.data.auth_token);
+          
+          // Verify manual cookie setting worked
+          setTimeout(() => {
+            const hasAuthCookieAfterManual = document.cookie.includes('authToken=');
+            console.log("🍪 Auth cookie present after manual set:", hasAuthCookieAfterManual);
+            console.log("🍪 Final document cookies:", document.cookie);
+          }, 100);
+        }
+      }
+
+      return data;
     } catch (error) {
-      console.error("Google login error:", error);
+      console.error("🌐 Google login error:", error);
+      return {
+        success: false,
+        message: "Google login failed. Please try again later.",
+      };
     }
   },
 
-  // Handle OAuth callback
+  // Handle OAuth callback (keep for backward compatibility)
   handleOAuthCallback: async (code: string, state?: string): Promise<AuthResponse> => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/google/callback`, {

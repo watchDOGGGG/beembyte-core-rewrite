@@ -12,3 +12,7 @@ export const PAYSTACK_PUBLIC_KEY =
   import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || "";
 export const PAYSTACK_SECRET_KEY =
   import.meta.env.VITE_PAYSTACK_SECRET_KEY || "";
+
+export const GOOGLE_CLIENT_ID =
+  import.meta.env.GOOGLE_CLIENT_ID ||
+  "603696688080-u4n3s4h50d42a0juoq8mum83c5ovog9v.apps.googleusercontent.com";

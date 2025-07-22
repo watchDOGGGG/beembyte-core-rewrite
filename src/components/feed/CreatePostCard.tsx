@@ -207,7 +207,7 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-xl mx-auto max-h-[90vh] overflow-hidden p-0 flex flex-col">
+        <DialogContent className="max-w-xl mx-auto max-h-[85vh] overflow-hidden p-0 flex flex-col">
           {/* Header - Fixed */}
           <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
             <div className="flex items-center space-x-3">
@@ -227,8 +227,8 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
-            {/* Scrollable Content */}
-            <ScrollArea className="flex-1 px-6">
+            {/* Scrollable Content Area */}
+            <div className="flex-1 overflow-y-auto px-6">
               <div className="space-y-4 py-4">
                 {/* Title Input */}
                 <div className="space-y-2">
@@ -357,7 +357,7 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
                   )}
                 </div>
               </div>
-            </ScrollArea>
+            </div>
 
             {/* Footer - Fixed */}
             <div className="border-t p-4 flex-shrink-0">

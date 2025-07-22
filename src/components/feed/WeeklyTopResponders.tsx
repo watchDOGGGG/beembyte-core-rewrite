@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Star, Trophy } from "lucide-react"
+import { API_BASE_URL } from "@/config/env"
 
 interface TopResponder {
   user_id: string
@@ -50,7 +51,7 @@ export const WeeklyTopResponders: React.FC = () => {
   useEffect(() => {
     const fetchTopResponders = async () => {
       try {
-        const response = await fetch('http://localhost:7000/api/v1/tasks/top-monthly-responders')
+        const response = await fetch(`${API_BASE_URL}/tasks/top-monthly-responders`)
         if (response.ok) {
           const data = await response.json()
           setTopResponders(data.data || [])
@@ -97,10 +98,10 @@ export const WeeklyTopResponders: React.FC = () => {
                   {index < 3 && (
                     <div
                       className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold ${index === 0
-                          ? "bg-yellow-500 text-white"
-                          : index === 1
-                            ? "bg-gray-400 text-white"
-                            : "bg-orange-600 text-white"
+                        ? "bg-yellow-500 text-white"
+                        : index === 1
+                          ? "bg-gray-400 text-white"
+                          : "bg-orange-600 text-white"
                         }`}
                     >
                       {index + 1}

@@ -7,11 +7,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { VideoPlayer } from "@/components/ui/VideoPlayer"
 import { ScoreModal } from "@/components/feed/ScoreModal"
 import { CommentModal } from "@/components/feed/CommentModal"
 import { ShareModal } from "@/components/feed/ShareModal"
 import { useFeed } from "@/hooks/useFeed"
 import { useAuth } from "@/hooks/useAuth"
+import { LinkupButton } from "@/components/feed/LinkupButton"
+import { LinkupCount } from "@/components/feed/LinkupCount"
 
 export const SingleFeed: React.FC = () => {
   const { postId } = useParams<{ postId: string }>()
@@ -21,11 +24,24 @@ export const SingleFeed: React.FC = () => {
   const [showCommentModal, setShowCommentModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [currentScore, setCurrentScore] = useState(0)
+  const [currentPeopleCount, setCurrentPeopleCount] = useState(0)
 
   const { getPost, getSuggestedPostsByUser, deletePost } = useFeed()
   const { loggedInUser } = useAuth()
 
-  // Fetch user data
+  // Always call all hooks in the same order
+  const { data: postResponse, isLoading: isLoadingPost, error: postError } = getPost(postId || '')
+  const post = postResponse?.data
+
+  // Always call this hook, but conditionally enable it
+  const { data: suggestedPosts = [], isLoading: isLoadingSuggested } = getSuggestedPostsByUser(
+    postId || '',
+    post?.user_id || '',
+    { enabled: !!post?.user_id } // Only enable when we have user_id
+  )
+
+  // Fetch user data - always call useEffect
   React.useEffect(() => {
     let isMounted = true
     let hasFetched = false
@@ -48,17 +64,15 @@ export const SingleFeed: React.FC = () => {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [loggedInUser])
 
-  // Fetch single post data
-  const { data: postResponse, isLoading: isLoadingPost, error: postError } = getPost(postId || '')
-  const post = postResponse?.data
-
-  // Fetch suggested posts if we have post data - pass the actual user_id
-  const { data: suggestedPosts = [], isLoading: isLoadingSuggested } = getSuggestedPostsByUser(
-    postId || '',
-    post?.user_id || ''
-  )
+  // Update local state when post data changes - always call useEffect
+  React.useEffect(() => {
+    if (post) {
+      setCurrentScore(post.total_score)
+      setCurrentPeopleCount(post.people_score_count)
+    }
+  }, [post])
 
   console.log('Post data:', post)
   console.log('Suggested posts:', suggestedPosts)
@@ -103,6 +117,11 @@ export const SingleFeed: React.FC = () => {
   // Check if current user is the post owner
   const isOwner = user && post && user.user_id === post.user_id
 
+  const handleOptimisticUpdate = (scoreChange: number, peopleChange: number) => {
+    setCurrentScore(prev => prev + scoreChange)
+    setCurrentPeopleCount(prev => prev + peopleChange)
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -138,28 +157,43 @@ export const SingleFeed: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Post Images */}
-            {post.images && post.images.length > 0 && (
+            {/* Post Media */}
+            {((post.images && post.images.length > 0) || (post.videos && post.videos.length > 0)) && (
               <div className="relative">
                 <div className="bg-muted rounded-lg overflow-hidden max-h-[60vh] lg:max-h-[70vh]">
                   <div className="flex transition-transform duration-300 ease-in-out" style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}>
-                    {post.images.map((image, index) => (
-                      <img
-                        key={index}
-                        src={image}
-                        alt={`${post.title} - Image ${index + 1}`}
-                        className="w-full h-auto object-contain flex-shrink-0 max-h-[60vh] lg:max-h-[70vh]"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.src = "/placeholder.svg"
-                        }}
-                      />
+                    {/* Render images first */}
+                    {post.images?.map((image, index) => (
+                      <div key={`image-${index}`} className="w-full flex-shrink-0">
+                        <img
+                          src={image}
+                          alt={`${post.title} - Image ${index + 1}`}
+                          className="w-full h-auto object-contain flex-shrink-0 max-h-[60vh] lg:max-h-[70vh]"
+                          style={{ height: '468px' }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.src = "/placeholder.svg"
+                          }}
+                        />
+                      </div>
+                    ))}
+                    {/* Render videos */}
+                    {post.videos?.map((video, index) => (
+                      <div key={`video-${index}`} className="w-full flex-shrink-0">
+                        <VideoPlayer
+                          src={video}
+                          className="w-full h-[60vh] lg:h-[70vh]"
+                          enableScrollAutoPlay={true}
+                          enablePictureInPicture={true}
+                          autoPlayWithSound={true}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Image Navigation */}
-                {post.images.length > 1 && (
+                {/* Media Navigation */}
+                {((post.images?.length || 0) + (post.videos?.length || 0)) > 1 && (
                   <>
                     {currentImageIndex > 0 && (
                       <button
@@ -169,7 +203,7 @@ export const SingleFeed: React.FC = () => {
                         <ChevronLeft className="h-3 w-3" />
                       </button>
                     )}
-                    {currentImageIndex < post.images.length - 1 && (
+                    {currentImageIndex < ((post.images?.length || 0) + (post.videos?.length || 0)) - 1 && (
                       <button
                         onClick={() => setCurrentImageIndex(prev => prev + 1)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
@@ -178,9 +212,9 @@ export const SingleFeed: React.FC = () => {
                       </button>
                     )}
 
-                    {/* Image Indicators */}
+                    {/* Media Indicators */}
                     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
-                      {post.images.map((_, index) => (
+                      {Array.from({ length: (post.images?.length || 0) + (post.videos?.length || 0) }).map((_, index) => (
                         <button
                           key={index}
                           onClick={() => setCurrentImageIndex(index)}
@@ -223,7 +257,7 @@ export const SingleFeed: React.FC = () => {
                   >
                     <Star className={`h-4 w-4 ${post.has_scored ? "fill-red-500 text-red-500" : ""}`} />
                     <span className="truncate">
-                      {post.people_score_count || 0} people • score {formatScore(post.total_score)}
+                      {currentPeopleCount} people • score {formatScore(currentScore)}
                     </span>
                   </Button>
 
@@ -245,7 +279,6 @@ export const SingleFeed: React.FC = () => {
                     <span className="truncate">Share</span>
                   </Button>
                 </div>
-
               </div>
             </div>
           </div>
@@ -266,10 +299,14 @@ export const SingleFeed: React.FC = () => {
                       {post.user.last_name[0]}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <h3 className="font-semibold" style={{ fontSize: '18px' }}>
-                      {post.user.first_name} {post.user.last_name}
-                    </h3>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold" style={{ fontSize: '18px' }}>
+                        {post.user.first_name} {post.user.last_name}
+                      </h3>
+                      <LinkupButton userId={post.user_id} />
+                    </div>
+                    <LinkupCount userId={post.user_id} className="mb-2" />
                     {post.user.is_vetted && post.user.responder_info && (
                       <div className="space-y-1">
                         <div className="flex items-center space-x-2">
@@ -382,6 +419,7 @@ export const SingleFeed: React.FC = () => {
         postId={post._id}
         currentUserScore={post.has_scored ? 8 : 0}
         hasScored={post.has_scored}
+        onOptimisticUpdate={handleOptimisticUpdate}
       />
 
       {/* Comment Modal */}

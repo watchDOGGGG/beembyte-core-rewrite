@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
-import { ImageIcon, Plus } from "lucide-react"
+import { ImageIcon, Plus, Video } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,12 +27,17 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
     title: "",
     description: "",
     images: [] as string[],
+    videos: [] as string[],
     category: "",
     tags: [] as string[],
   })
   const [tagInput, setTagInput] = useState("")
   const [imagePreviews, setImagePreviews] = useState<string[]>([])
   const [imageFiles, setImageFiles] = useState<File[]>([])
+  const [videoPreviews, setVideoPreviews] = useState<string[]>([])
+  const [videoFiles, setVideoFiles] = useState<File[]>([])
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { isCreating } = useFeed()
   const { uploadFiles, isUploading } = useFileUpload()
 
@@ -70,6 +75,21 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
     }
   }
 
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files) {
+      const newFiles = Array.from(files)
+      const newVideoPreviews: string[] = []
+      
+      newFiles.forEach((file) => {
+        newVideoPreviews.push(URL.createObjectURL(file))
+      })
+      
+      setVideoFiles([...videoFiles, ...newFiles])
+      setVideoPreviews([...videoPreviews, ...newVideoPreviews])
+    }
+  }
+
   const removeImage = (indexToRemove: number) => {
     const updatedFiles = [...imageFiles]
     updatedFiles.splice(indexToRemove, 1)
@@ -79,10 +99,22 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
     setImagePreviews(updatedImagePreviews)
   }
 
+  const removeVideo = (indexToRemove: number) => {
+    const updatedFiles = [...videoFiles]
+    updatedFiles.splice(indexToRemove, 1)
+    const updatedVideoPreviews = [...videoPreviews]
+    updatedVideoPreviews.splice(indexToRemove, 1)
+    setVideoFiles(updatedFiles)
+    setVideoPreviews(updatedVideoPreviews)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
     
     try {
+      setUploadProgress(20)
+      
       // Upload images first if any
       let imageUrls: string[] = []
       if (imageFiles.length > 0) {
@@ -92,30 +124,54 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
         }
       }
 
+      setUploadProgress(60)
+
+      // Upload videos if any
+      let videoUrls: string[] = []
+      if (videoFiles.length > 0) {
+        const uploadedUrls = await uploadFiles(videoFiles)
+        if (uploadedUrls) {
+          videoUrls = uploadedUrls
+        }
+      }
+
+      setUploadProgress(90)
+
       const postData = {
         title: formData.title,
         description: formData.description,
         images: imageUrls,
+        videos: videoUrls,
         category: formData.category,
         tags: formData.tags,
       }
       
+      // Close modal immediately and show uploading state
+      setIsModalOpen(false)
+      
       await onPostCreate(postData)
+      
+      setUploadProgress(100)
       
       // Reset form
       setFormData({
         title: "",
         description: "",
         images: [],
+        videos: [],
         category: "",
         tags: [],
       })
       setTagInput("")
       setImagePreviews([])
       setImageFiles([])
-      setIsModalOpen(false)
+      setVideoPreviews([])
+      setVideoFiles([])
+      setUploadProgress(0)
     } catch (error) {
       console.error("Error creating post:", error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -281,6 +337,50 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
               )}
             </div>
 
+            {/* Video Upload */}
+            <div className="space-y-1">
+              <Label className="text-xs font-medium">Videos</Label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                <input
+                  type="file"
+                  multiple
+                  accept="video/*"
+                  onChange={handleVideoUpload}
+                  className="hidden"
+                  id="video-upload"
+                />
+                <label htmlFor="video-upload" className="cursor-pointer">
+                  <div className="flex flex-col items-center space-y-1">
+                    <Video className="h-6 w-6 text-gray-400" />
+                    <span className="text-xs text-gray-600">Click to upload videos</span>
+                  </div>
+                </label>
+              </div>
+              {/* Video Previews */}
+              {videoPreviews.length > 0 && (
+                <div className="grid grid-cols-1 gap-2 mt-2">
+                  {videoPreviews.map((preview, index) => (
+                    <div key={index} className="relative">
+                      <video
+                        src={preview}
+                        className="w-full h-32 object-contain bg-black/5 dark:bg-black/20 rounded border"
+                        controls
+                        muted
+                        preload="metadata"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeVideo(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Submit Button */}
             <div className="flex justify-end space-x-2 pt-2">
               <Button
@@ -293,15 +393,55 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
               </Button>
               <Button
                 type="submit"
-                disabled={isCreating || isUploading || !formData.title || !formData.description}
+                disabled={isSubmitting || isCreating || isUploading || !formData.title || !formData.description}
                 className="h-8 px-3 text-xs"
               >
-                {isUploading ? "Uploading..." : isCreating ? "Creating..." : "Create Post"}
+                {isSubmitting || isUploading ? "Uploading..." : isCreating ? "Creating..." : "Create Post"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Upload Progress Toast */}
+      {isSubmitting && uploadProgress > 0 && (
+        <div className="fixed top-4 right-4 bg-white dark:bg-gray-800 border rounded-lg p-4 shadow-lg z-50">
+          <div className="flex items-center space-x-3">
+            <div className="relative w-8 h-8">
+              <svg className="w-8 h-8 transform -rotate-90" viewBox="0 0 32 32">
+                <circle
+                  cx="16"
+                  cy="16"
+                  r="14"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="none"
+                  className="text-gray-200 dark:text-gray-700"
+                />
+                <circle
+                  cx="16"
+                  cy="16"
+                  r="14"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeDasharray={`${2 * Math.PI * 14}`}
+                  strokeDashoffset={`${2 * Math.PI * 14 * (1 - uploadProgress / 100)}`}
+                  className="text-primary transition-all duration-300"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xs font-medium">{uploadProgress}%</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Uploading post...</p>
+              <p className="text-xs text-gray-500">Please wait</p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

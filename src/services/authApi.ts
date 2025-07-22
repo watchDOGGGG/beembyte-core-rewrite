@@ -61,7 +61,21 @@ export interface VerifyOtpResponse {
   success: boolean;
 }
 
-// No longer using cookie storage - using credentials include
+// Helper function to manually set auth token if server doesn't set cookie
+const setAuthTokenManually = (token: string) => {
+  if (token) {
+    try {
+      // Set cookie manually as fallback
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 7); // 7 days expiry
+      document.cookie = `authToken=${token}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax; ${window.location.protocol === 'https:' ? 'Secure;' : ''}`;
+      console.log("🍪 Manually set auth token cookie:", token.substring(0, 10) + "...");
+      console.log("🍪 Cookie after manual set:", document.cookie);
+    } catch (error) {
+      console.error("🍪 Failed to set auth token manually:", error);
+    }
+  }
+};
 
 // Set forgot password data in cookie
 const setForgotPasswordCookie = (userId: string, code: string) => {
@@ -121,6 +135,11 @@ export const authApi = {
   // Login a user
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
+      console.log("🌐 Making login request to:", `${API_BASE_URL}/users/login`);
+      console.log("🌐 Request credentials include:", true);
+      console.log("🌐 Current domain:", window.location.hostname);
+      console.log("🌐 Protocol:", window.location.protocol);
+      
       const response = await fetch(`${API_BASE_URL}/users/login`, {
         method: "POST",
         headers: {
@@ -130,10 +149,41 @@ export const authApi = {
         credentials: "include",
       });
 
+      console.log("🌐 Login response status:", response.status);
+      console.log("🌐 Login response headers:", Object.fromEntries(response.headers.entries()));
+      
+      // Log Set-Cookie headers specifically
+      const setCookieHeader = response.headers.get('set-cookie');
+      console.log("🍪 Set-Cookie header from server:", setCookieHeader);
+
       const data = await response.json();
+      console.log("🌐 Login response data:", { success: data.success, hasData: !!data.data, hasToken: !!data.data?.auth_token });
+
+      // Check if cookies are set after login
+      if (data.success) {
+        console.log("🍪 Document cookies immediately after login:", document.cookie);
+        
+        // Check if server set the auth cookie
+        const hasAuthCookie = document.cookie.includes('authToken=');
+        console.log("🍪 Auth cookie present after server response:", hasAuthCookie);
+        
+        // If server didn't set cookie but we have a token, set it manually
+        if (!hasAuthCookie && data.data?.auth_token) {
+          console.log("🍪 Server didn't set cookie, setting manually...");
+          setAuthTokenManually(data.data.auth_token);
+          
+          // Verify manual cookie setting worked
+          setTimeout(() => {
+            const hasAuthCookieAfterManual = document.cookie.includes('authToken=');
+            console.log("🍪 Auth cookie present after manual set:", hasAuthCookieAfterManual);
+            console.log("🍪 Final document cookies:", document.cookie);
+          }, 100);
+        }
+      }
+
       return data;
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("🌐 Login error:", error);
       return {
         success: false,
         message: "Failed to login. Please try again later.",
@@ -292,10 +342,16 @@ export const authApi = {
 
       const data = await response.json();
       clearForgotPasswordCookies();
+      
+      // Also clear auth token manually in case it was set manually
+      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      
       return data;
     } catch (error) {
       console.error("Logout error:", error);
       clearForgotPasswordCookies();
+      // Clear auth token manually on error too
+      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       return {
         success: false,
         message: "Logout failed. Please try again.",

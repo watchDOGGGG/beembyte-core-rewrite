@@ -28,12 +28,6 @@ const teamMembers: TeamMember[] = [
     bgColor: "bg-blue-100"
   },
   {
-    name: "Gideon",
-    role: "Engineer",
-    seed: "gideon",
-    bgColor: "bg-pink-100"
-  },
-  {
     name: "Mete oyama",
     role: "Brand Identity / Graphic designer / Co-Founder",
     seed: "mete",
@@ -59,13 +53,13 @@ const AboutUs = () => {
       <PublicHeader />
 
       {/* Hero Section - Updated with background image */}
-      <section 
+      <section
         className="py-24 md:py-32 text-white w-full bg-cover bg-center bg-no-repeat relative"
         style={{ backgroundImage: 'url(https://res.cloudinary.com/dxayyjtsq/image/upload/v1751710068/beembyte_wallpaper_2_fp3r8o.png)' }}
       >
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/50"></div>
-        
+
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto px-4 relative z-10">
           <h1 className="text-4xl md:text-6xl font-bold mb-8 text-primary">
             Powering your next move.

@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -33,7 +32,15 @@ import { useAuthGuard } from "@/hooks/useAuthGuard"
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuthGuard(true)
+  const { isAuthenticated, isLoading } = useAuthGuard(true)
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
 
   if (!isAuthenticated) {
     // useAuthGuard will handle the redirect, so we can return null or a loading state
@@ -51,10 +58,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Simple check without calling useAuthGuard to avoid auth verification
   const hasAuthCookie = document.cookie.includes("authToken=")
-  const storedUser = localStorage.getItem("authorizeUser")
-  const isAuthenticated = hasAuthCookie && !!storedUser
 
-  if (isAuthenticated) {
+  console.log("🔍 AuthRoute check:", { hasAuthCookie });
+
+  if (hasAuthCookie) {
+    console.log("🔍 User has auth cookie, redirecting to feed");
     return <Navigate to="/feed" replace />
   }
 
@@ -65,11 +73,14 @@ const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const RootRoute: React.FC = () => {
   // Simple check without triggering auth verification
   const hasAuthCookie = document.cookie.includes("authToken=")
-  const storedUser = localStorage.getItem("authorizeUser")
-  const isAuthenticated = hasAuthCookie && !!storedUser
+
+  console.log("🔍 RootRoute check:", { hasAuthCookie });
 
   // If authenticated, go to feed, otherwise go to landing
-  return <Navigate to={isAuthenticated ? "/feed" : "/landing"} replace />
+  const redirectTo = hasAuthCookie ? "/feed" : "/landing";
+  console.log("🔍 RootRoute redirecting to:", redirectTo);
+  
+  return <Navigate to={redirectTo} replace />
 }
 
 function App() {

@@ -30,7 +30,7 @@ export const Header = () => {
   useEffect(() => {
     let isMounted = true;
     let hasFetched = false;
-    
+
     const setLoggedInUser = async () => {
       if (!hasFetched) {
         hasFetched = true;
@@ -44,7 +44,7 @@ export const Header = () => {
         }
       }
     };
-    
+
     setLoggedInUser();
 
     return () => {
@@ -65,8 +65,8 @@ export const Header = () => {
   console.log('Header dicebear URL:', dicebearUrl);
 
   const menuItems = [
-    { label: 'Dashboard', path: '/dashboard' },
     { label: 'Explore', path: '/feed' },
+    { label: 'Dashboard', path: '/dashboard' },
     { label: 'Task History', path: '/task-history' }
   ];
 
@@ -102,12 +102,6 @@ export const Header = () => {
 
         <div className="flex items-center space-x-4">
           {/* Create Task Button */}
-          <Button
-            onClick={() => navigate('/create-task')}
-            className="hidden sm:flex bg-primary hover:bg-primary/80 text-white text-sm"
-          >
-            <Plus size={16} className="mr-2" /> New Task
-          </Button>
 
           {/* User Menu - Desktop */}
           {!userLoading && user ? (
@@ -217,13 +211,6 @@ export const Header = () => {
                         {item.label}
                       </button>
                     ))}
-
-                    <Button
-                      onClick={() => navigate('/create-task')}
-                      className="bg-primary hover:bg-primary/80 text-white text-sm w-full justify-start"
-                    >
-                      <Plus size={16} className="mr-2" /> New Task
-                    </Button>
 
                     {!userLoading && user && (
                       <>

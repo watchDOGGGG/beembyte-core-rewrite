@@ -1,8 +1,8 @@
-
 "use client"
 
 import React from "react"
 import { Heart, MessageCircle, Share2, Star, ChevronLeft, ChevronRight, Trash2, Check, MoreHorizontal } from "lucide-react"
+import { getMediaType } from "@/utils/mediaUtils"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -12,6 +12,9 @@ import { ScoreModal } from "./ScoreModal"
 import { useFeed } from "@/hooks/useFeed"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
+import { VideoPlayer } from "@/components/ui/VideoPlayer"
+import { LinkupButton } from "./LinkupButton"
+import { LinkupCount } from "./LinkupCount"
 
 interface FeedPost {
   _id: string
@@ -19,6 +22,7 @@ interface FeedPost {
   title: string
   description: string
   images: string[]
+  videos?: string[]
   category: string
   tags: string[]
   total_score: number
@@ -84,6 +88,28 @@ export const FeedCard: React.FC<FeedCardProps> = ({
   const [fetchedComments, setFetchedComments] = React.useState<any[]>([])
   const [commentsLoaded, setCommentsLoaded] = React.useState(false)
   const [currentUser, setCurrentUser] = React.useState<any>(null)
+  const [optimisticComments, setOptimisticComments] = React.useState<any[]>([])
+
+  // Combine all media (images and videos) for carousel
+  const allMedia = React.useMemo(() => {
+    const media: Array<{ type: 'image' | 'video', url: string }> = []
+
+    if (post.images) {
+      post.images.forEach(url => {
+        const detectedType = getMediaType(url)
+        media.push({ type: detectedType === 'unknown' ? 'image' : detectedType, url })
+      })
+    }
+
+    if (post.videos) {
+      post.videos.forEach(url => {
+        const detectedType = getMediaType(url)
+        media.push({ type: detectedType === 'unknown' ? 'video' : detectedType, url })
+      })
+    }
+
+    return media
+  }, [post.images, post.videos])
 
   const { getPostComments } = useFeed()
   const { loggedInUser } = useAuth()
@@ -111,7 +137,15 @@ export const FeedCard: React.FC<FeedCardProps> = ({
     }
   }, [showComments, commentsQuery.data, commentsLoaded])
 
-  const handleImageChange = (newIndex: number) => {
+  // Clear optimistic comments when real comments update
+  React.useEffect(() => {
+    if (commentsQuery.data && commentsQuery.data.length > 0) {
+      setOptimisticComments([])
+      setFetchedComments(commentsQuery.data)
+    }
+  }, [commentsQuery.data])
+
+  const handleMediaChange = (newIndex: number) => {
     if (isTransitioning) return
     setIsTransitioning(true)
     setTimeout(() => {
@@ -120,19 +154,34 @@ export const FeedCard: React.FC<FeedCardProps> = ({
     }, 150)
   }
 
-  const handlePrevImage = () => {
-    const newIndex = currentImageIndex === 0 ? post.images.length - 1 : currentImageIndex - 1
-    handleImageChange(newIndex)
+  const handlePrevMedia = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const newIndex = currentImageIndex === 0 ? allMedia.length - 1 : currentImageIndex - 1
+    handleMediaChange(newIndex)
   }
 
-  const handleNextImage = () => {
-    const newIndex = currentImageIndex === post.images.length - 1 ? 0 : currentImageIndex + 1
-    handleImageChange(newIndex)
+  const handleNextMedia = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const newIndex = currentImageIndex === allMedia.length - 1 ? 0 : currentImageIndex + 1
+    handleMediaChange(newIndex)
   }
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (commentText.trim() && onComment) {
+      // Add optimistic comment immediately
+      const optimisticComment = {
+        _id: `temp-${Date.now()}`,
+        content: commentText.trim(),
+        user_id: {
+          first_name: currentUser?.first_name || 'You',
+          last_name: currentUser?.last_name || '',
+        },
+        created_at: new Date().toISOString(),
+        isOptimistic: true
+      }
+
+      setOptimisticComments(prev => [...prev, optimisticComment])
       onComment(commentText.trim())
       setCommentText("")
     }
@@ -146,11 +195,16 @@ export const FeedCard: React.FC<FeedCardProps> = ({
   }
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Only navigate if not clicking on interactive elements
-    if ((e.target as HTMLElement).closest('button, a, input, [role="menu"], [role="menuitem"]')) {
+    // Only navigate if not clicking on interactive elements or media
+    if ((e.target as HTMLElement).closest('button, a, input, [role="menu"], [role="menuitem"], .media-container')) {
       return
     }
     navigate(`/feed/${post._id}`)
+  }
+
+  const handleMediaClick = (e: React.MouseEvent) => {
+    // Prevent navigation when clicking on media
+    e.stopPropagation()
   }
 
   const handleDeletePost = () => {
@@ -161,6 +215,11 @@ export const FeedCard: React.FC<FeedCardProps> = ({
 
   // Check if current user is the post owner
   const isOwner = currentUser && currentUser.user_id === post.user_id
+
+  const handleOptimisticUpdate = (scoreChange: number, peopleChange: number) => {
+    setCurrentScore(prev => prev + scoreChange)
+    setCurrentPeopleCount(prev => prev + peopleChange)
+  }
 
   return (
     <>
@@ -183,29 +242,33 @@ export const FeedCard: React.FC<FeedCardProps> = ({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-1.5 mb-0.5">
-                <h4 className="font-semibold text-gray-900 dark:text-white truncate" style={{ fontSize: '12px' }}>
-                  {post.user.first_name} {post.user.last_name}
-                </h4>
-                {post.user.is_vetted && (
-                  <>
-                    <Check className="h-3 w-3 text-green-600" />
-                    <span className="text-gray-400" style={{ fontSize: '12px' }}>•</span>
-                  </>
-                )}
-                {post.user.responder_info?.rank_status && (
-                  <span
-                    className="text-xs capitalize px-1.5 py-0.5 rounded-full"
-                    style={{
-                      fontSize: '12px',
-                      backgroundColor: post.user.responder_info.rank_status.rank_color + '20',
-                      color: post.user.responder_info.rank_status.rank_color
-                    }}
-                  >
-                    {post.user.responder_info.rank_status.rank_name}
-                  </span>
-                )}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1.5">
+                  <h4 className="font-semibold text-gray-900 dark:text-white truncate" style={{ fontSize: '12px' }}>
+                    {post.user.first_name} {post.user.last_name}
+                  </h4>
+                  {post.user.is_vetted && (
+                    <>
+                      <Check className="h-3 w-3 text-green-600" />
+                      <span className="text-gray-400" style={{ fontSize: '12px' }}>•</span>
+                    </>
+                  )}
+                  {post.user.responder_info?.rank_status && (
+                    <span
+                      className="text-xs capitalize px-1.5 py-0.5 rounded-full"
+                      style={{
+                        fontSize: '12px',
+                        backgroundColor: post.user.responder_info.rank_status.rank_color + '20',
+                        color: post.user.responder_info.rank_status.rank_color
+                      }}
+                    >
+                      {post.user.responder_info.rank_status.rank_name}
+                    </span>
+                  )}
+                </div>
+                <LinkupButton userId={post.user_id} />
               </div>
+
               <div className="flex items-center space-x-1.5 text-gray-500 dark:text-gray-400" style={{ fontSize: '12px' }}>
                 {post.user.is_vetted && post.user.responder_info && (
                   <>
@@ -220,6 +283,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({
                 )}
                 <span>{new Date(post.created_at).toLocaleDateString()}</span>
               </div>
+              <LinkupCount userId={post.user_id} className="mb-1" />
             </div>
             {/* Menu Dropdown - Only show for post owner */}
             {isOwner && (
@@ -266,50 +330,79 @@ export const FeedCard: React.FC<FeedCardProps> = ({
           )}
         </div>
 
-        {/* Images Carousel - Full Width Natural Height */}
-        {post.images.length > 0 && (
-          <div className="relative w-full">
+        {/* Media Carousel - Full Width with Increased Height */}
+        {allMedia.length > 0 && (
+          <div className="relative w-full media-container" onClick={handleMediaClick}>
             <div className="w-full overflow-hidden">
-              <div className="flex transition-transform duration-300 ease-in-out" style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}>
-                {post.images.map((image, index) => (
-                  <img
-                    key={index}
-                    src={image || "/placeholder.svg"}
-                    alt={`${post.title} - Image ${index + 1}`}
-                    className="w-full h-[586px] object-cover flex-shrink-0"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement
-                      target.src = "/placeholder.svg?height=400&width=400"
-                    }}
-                  />
-                ))}
+              <div
+                className="flex transition-transform duration-300 ease-in-out"
+                style={{
+                  transform: `translateX(-${currentImageIndex * 100}%)`,
+                }}
+              >
+                {allMedia.map((media, index) => {
+                  const isCarousel = allMedia.length > 1
+
+                  return (
+                    <div
+                      key={index}
+                      className={`w-full flex-shrink-0 ${isCarousel ? "h-[558px]" : ""
+                        } flex items-center justify-center bg-black`}
+                    >
+                      {media.type === 'image' ? (
+                        <img
+                          src={media.url || "/placeholder.svg"}
+                          alt={`${post.title} - Image ${index + 1}`}
+                          className={`w-full ${isCarousel ? "h-full object-cover" : "h-auto object-contain"
+                            }`}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.src = "/placeholder.svg?height=558&width=400"
+                          }}
+                        />
+                      ) : (
+                        <VideoPlayer
+                          src={media.url}
+                          className={`w-full ${isCarousel ? "h-full" : "h-[400px]"}`}
+                          enableScrollAutoPlay={true}
+                          enablePictureInPicture={true}
+                          autoPlayWithSound={true}
+                        />
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
-            {/* Image Navigation */}
-            {post.images.length > 1 && (
+
+            {/* Media Navigation */}
+            {allMedia.length > 1 && (
               <>
                 {currentImageIndex > 0 && (
                   <button
-                    onClick={handlePrevImage}
+                    onClick={handlePrevMedia}
                     className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
                   >
                     <ChevronLeft className="h-3 w-3" />
                   </button>
                 )}
-                {currentImageIndex < post.images.length - 1 && (
+                {currentImageIndex < allMedia.length - 1 && (
                   <button
-                    onClick={handleNextImage}
+                    onClick={handleNextMedia}
                     className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
                   >
                     <ChevronRight className="h-3 w-3" />
                   </button>
                 )}
-                {/* Image Indicators */}
+                {/* Media Indicators */}
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
-                  {post.images.map((_, index) => (
+                  {allMedia.map((_, index) => (
                     <button
                       key={index}
-                      onClick={() => handleImageChange(index)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleMediaChange(index)
+                      }}
                       className={`w-1.5 h-1.5 rounded-full transition-colors ${index === currentImageIndex ? "bg-white" : "bg-white/50"
                         }`}
                     />
@@ -386,8 +479,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({
                 </div>
               </form>
 
-              {/* Comments List - Populated from API */}
-              {fetchedComments.map((comment) => (
+              {/* Comments List - Show optimistic comments first, then API comments */}
+              {[...optimisticComments, ...fetchedComments].map((comment) => (
                 <div key={comment._id} className="flex items-start space-x-2.5">
                   <Avatar className="h-6 w-6 flex-shrink-0">
                     <AvatarImage
@@ -433,7 +526,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({
         onClose={() => setShowScoreModal(false)}
         postId={post._id}
         hasScored={post.has_scored}
-        currentUserScore={post.has_scored ? 8 : 0}
+        currentUserScore={post.has_scored ? currentScore : 0}
+        onOptimisticUpdate={handleOptimisticUpdate}
       />
     </>
   )

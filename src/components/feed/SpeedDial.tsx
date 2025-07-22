@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react"
 import { Plus, FileText, CheckSquare } from "lucide-react"
 import { useNavigate } from "react-router-dom"
@@ -66,9 +67,8 @@ export const SpeedDial: React.FC<SpeedDialProps> = ({ onPostCreate }) => {
     <>
       <div className="fixed bottom-6 right-6 z-50">
         {/* Speed Dial Actions */}
-        <div className={`absolute bottom-16 right-0 flex flex-col space-y-3 transition-all duration-300 ${
-          isExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-        }`}>
+        <div className={`absolute bottom-16 right-0 flex flex-col space-y-3 transition-all duration-300 ${isExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+          }`}>
           {/* Create Task Button */}
           <button
             onClick={handleCreateTask}
@@ -93,16 +93,15 @@ export const SpeedDial: React.FC<SpeedDialProps> = ({ onPostCreate }) => {
         {/* Main Speed Dial Button */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className={`w-14 h-14 bg-primary hover:bg-primary/90 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center ${
-            isExpanded ? "rotate-45" : ""
-          }`}
+          className={`w-12 h-12 bg-primary hover:bg-primary/90 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center ${isExpanded ? "rotate-45" : ""
+            }`}
           title="Quick Actions"
         >
-          <Plus className="h-6 w-6" />
+          <Plus className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Create Post Modal */}
+      {/* Create Post Modal - Opens directly */}
       <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
         <DialogContent className="max-w-2xl">
           <CreatePostCard user={user} onPostCreate={handlePostCreate} />

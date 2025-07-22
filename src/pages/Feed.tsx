@@ -2,9 +2,9 @@
 import React, { useState } from "react"
 import { FeedCard } from "@/components/feed/FeedCard"
 import { CreatePostCard } from "@/components/feed/CreatePostCard"
-import { SpeedDial } from "@/components/feed/SpeedDial"
 import { WeeklyTopResponders } from "@/components/feed/WeeklyTopResponders"
 import { TrendingCategories } from "@/components/feed/TrendingCategories"
+import { FeedActionButton } from "@/components/feed/FeedActionButton"
 import { useAuth } from "@/hooks/useAuth"
 import { useFeed } from "@/hooks/useFeed"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -18,6 +18,7 @@ interface FeedPost {
   title: string
   description: string
   images: string[]
+  videos?: string[]
   category: string
   tags: string[]
   total_score: number
@@ -57,6 +58,7 @@ const Feed = () => {
   const [user, setUser] = useState<User | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("all")
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const { getFeedPosts, createPost, likePost, unlikePost, commentOnPost, deleteComment, deletePost } = useFeed()
 
   // Fetch feed posts from API
@@ -158,6 +160,10 @@ const Feed = () => {
     }
   }
 
+  const handleActionButtonClick = () => {
+    setShowCreateModal(true)
+  }
+
   if (feedLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -220,7 +226,7 @@ const Feed = () => {
           {/* Main Content - Two Column Layout on Large Screens */}
           <div className="w-full lg:max-w-6xl lg:mx-auto lg:flex lg:gap-6 lg:px-4 lg:justify-center">
             {/* Main Feed - Instagram Width on Large Screens */}
-            <div className="w-full lg:max-w-[500px] lg:flex-shrink-0 lg:mx-auto lg:mr-6">
+            <div className="w-full lg:max-w-[510px] lg:flex-shrink-0 lg:mx-auto lg:mr-6">
               {/* Create Post Card - only show if logged in */}
               {user && (
                 <div className="w-full px-4 lg:px-0 py-3">
@@ -343,10 +349,38 @@ const Feed = () => {
             </div>
           </div>
         </main>
-        
-        {/* Speed Dial Component */}
-        <SpeedDial onPostCreate={handlePostCreate} />
       </div>
+
+      {/* Feed Action Button */}
+      <FeedActionButton onClick={handleActionButtonClick} />
+
+      {/* Create Post Modal */}
+      {showCreateModal && user && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-4 border-b">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Create New Post</h3>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            <div className="p-4">
+              <CreatePostCard
+                user={user}
+                onPostCreate={async (postData) => {
+                  await handlePostCreate(postData)
+                  setShowCreateModal(false)
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

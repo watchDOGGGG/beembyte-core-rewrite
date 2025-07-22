@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import {
@@ -17,13 +17,33 @@ import { socketService, socket } from "@/services/socket"
 import { getCookie } from "@/utils/formatUtils"
 import { userApiService } from "@/services/userApi"
 
+// Helper function to notify all tabs of auth state change
+const notifyAuthChange = () => {
+  localStorage.setItem('auth-change', Date.now().toString());
+};
+
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [resendCountdown, setResendCountdown] = useState(0)
   const location = useLocation();
   const navigate = useNavigate();
+  const isLoggingOutRef = useRef(false);
+  const verifyTokenAbortController = useRef<AbortController | null>(null);
 
   const { setUser } = useAppContext()
+
+  // Listen for auth changes across tabs
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'auth-change') {
+        console.log('Auth change detected from another tab, refreshing...');
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const register = async (userData: RegisterRequest) => {
     setIsLoading(true)
@@ -32,7 +52,7 @@ export const useAuth = () => {
 
       if (response.success) {
         toast.success(typeof response.message === 'string' ? response.message : "Registration successful! Please verify your email.")
-        localStorage.setItem("authEmail", userData.email)
+        sessionStorage.setItem("authEmail", userData.email)
         navigate("/verify-code")
       } else {
         // For register, message is always a string
@@ -53,19 +73,22 @@ export const useAuth = () => {
   const login = async (credentials: LoginRequest) => {
     setIsLoading(true)
     try {
+      console.log("🔐 Starting login process...");
       const response = await authApi.login(credentials)
+      console.log("🔐 Login API response:", { success: response.success, hasData: !!response.data });
 
       if (response.success) {
         const successMessage = typeof response.message === 'string' ? response.message : "Login successful!"
         toast.success(successMessage)
 
         const { auth_token, user } = response.data
-        // Token is now stored in cookie by the authApi.login function
-        // User data is now stored in HTTP-only cookies
+        console.log("🔐 Login data received:", { hasToken: !!auth_token, hasUser: !!user });
 
         // Ensure user is valid before setting it
         if (user) {
+          console.log("🔐 Setting user in context:", user.user_id);
           setUser(user as User)
+          console.log("🔐 User set in context");
 
           // Connect to socket after successful login
           if (user.user_id && user.role) {
@@ -84,12 +107,23 @@ export const useAuth = () => {
               toast.error("Could not establish live connection. Some features may be limited.")
             }
           }
+
+          // Notify other tabs of auth change
+          notifyAuthChange();
+          
+          // Navigate to home after successful login
+          setTimeout(() => {
+            console.log("🔐 Auth successful, navigating to home page...");
+            navigate("/")
+          }, 200);
+        } else {
+          console.error("🔐 No user data received from login response");
         }
-        navigate("/")
       } else {
+        console.log("🔐 Login failed:", response.message);
         // Check if the error is due to unverified email (only for login endpoint)
         if (typeof response.message === 'object' && response.message.verified === false) {
-          localStorage.setItem("authEmail", credentials.email)
+          sessionStorage.setItem("authEmail", credentials.email)
           toast.error("Please verify your email to continue")
           navigate("/verify-code")
         } else {
@@ -102,7 +136,7 @@ export const useAuth = () => {
         }
       }
     } catch (error) {
-      console.error("Login error:", error)
+      console.error("🔐 Login error:", error)
       toast.error("An unexpected error occurred. Please try again later.")
     } finally {
       setIsLoading(false)
@@ -116,7 +150,7 @@ export const useAuth = () => {
       const response = await authApi.verifyCode(verifyData)
 
       if (response.success) {
-        localStorage.removeItem("authEmail")
+        sessionStorage.removeItem("authEmail")
         toast.success(typeof response.message === 'string' ? response.message : "Verification successful!")
         navigate("/login")
       } else {
@@ -138,7 +172,7 @@ export const useAuth = () => {
   const resendVerification = async () => {
     setIsLoading(true)
     try {
-      const email = localStorage.getItem("authEmail")
+      const email = sessionStorage.getItem("authEmail")
       const resendData: ResendVerificationRequest = { email }
       const response = await authApi.resendVerification(resendData)
 
@@ -172,6 +206,20 @@ export const useAuth = () => {
   }
 
   const logout = async () => {
+    // Prevent multiple logout calls
+    if (isLoggingOutRef.current) {
+      return;
+    }
+    
+    console.log("Manual logout initiated");
+    isLoggingOutRef.current = true;
+
+    // Cancel any ongoing token verification
+    if (verifyTokenAbortController.current) {
+      verifyTokenAbortController.current.abort();
+      verifyTokenAbortController.current = null;
+    }
+
     // Disconnect socket before logout
     try {
       socketService.disconnect()
@@ -192,25 +240,68 @@ export const useAuth = () => {
       toast.error("An error occurred during logout")
     }
 
+    // Clear user state and navigate
     setUser(null)
+    
+    // Notify other tabs of auth change
+    notifyAuthChange();
+    
+    // Reset logout flag after a delay
+    setTimeout(() => {
+      isLoggingOutRef.current = false;
+    }, 1000);
+
     navigate("/login")
   }
 
   const verifyAuthToken = async () => {
+    // Don't verify if already logging out
+    if (isLoggingOutRef.current) {
+      return { success: false };
+    }
+
+    // Cancel previous verification if still running
+    if (verifyTokenAbortController.current) {
+      verifyTokenAbortController.current.abort();
+    }
+
+    verifyTokenAbortController.current = new AbortController();
+
     try {
-
-
       const response = await authApi.verifyAuthToken()
-      if (!response.success) {
-        // Clear invalid token and redirect
-        authApi.logout()
-        navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
+      
+      // Check if request was aborted
+      if (verifyTokenAbortController.current?.signal.aborted) {
+        return { success: false };
       }
+
+      if (!response.success) {
+        console.log("Token verification failed, clearing local state");
+        // Only clear local state, don't call logout automatically
+        setUser(null);
+        // Don't navigate here - let useAuthGuard handle it
+      } else {
+        // Token is valid, set user from response
+        if (response.data) {
+          setUser(response.data);
+        }
+      }
+      return response;
     } catch (error) {
+      // Check if error is due to abort
+      if (error.name === 'AbortError') {
+        return { success: false };
+      }
+      
       console.error("Auth token verification error:", error)
-      // Clear potentially invalid token and redirect on error
-      authApi.logout()
-      navigate(`/login?returnTo=${encodeURIComponent(location.pathname)}`)
+      // Clear potentially invalid token on error
+      if (!isLoggingOutRef.current) {
+        setUser(null);
+        // Don't navigate here - let useAuthGuard handle it
+      }
+      return { success: false };
+    } finally {
+      verifyTokenAbortController.current = null;
     }
   }
 

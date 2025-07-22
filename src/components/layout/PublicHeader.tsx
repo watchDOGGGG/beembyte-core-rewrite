@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X, User, LogOut, ChevronDown } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -21,9 +21,10 @@ export const PublicHeader = () => {
   const [user, setUser] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   const { loggedInUser, logout } = useAuth();
 
-  // Check authentication status immediately on mount
+  // Check authentication status on mount and route changes
   useEffect(() => {
     const checkAuthStatus = () => {
       const hasAuthCookie = document.cookie.includes("authToken=")
@@ -53,7 +54,36 @@ export const PublicHeader = () => {
     };
 
     checkAuthStatus();
-  }, []);
+  }, [location.pathname]); // Re-check on route changes
+
+  // Also check periodically for cookie changes (in case login happens in another tab/component)
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const hasAuthCookie = document.cookie.includes("authToken=")
+      const storedUser = localStorage.getItem("authorizeUser")
+      const authStatus = hasAuthCookie && !!storedUser
+
+      if (authStatus !== isAuthenticated) {
+        console.log('Auth status changed - updating header');
+        setIsAuthenticated(authStatus);
+
+        if (authStatus && storedUser) {
+          try {
+            const storedUserData = JSON.parse(storedUser);
+            if (storedUserData && storedUserData.first_name) {
+              setUser(storedUserData);
+            }
+          } catch (parseError) {
+            console.error('Error parsing stored user:', parseError);
+          }
+        } else {
+          setUser(null);
+        }
+      }
+    }, 1000); // Check every second
+
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated]);
 
   // Separate effect for API user fetch (non-blocking)
   useEffect(() => {
@@ -96,8 +126,6 @@ export const PublicHeader = () => {
   const dicebearUrl = user?.first_name ?
     `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(user.first_name)}` :
     '';
-
-  console.log('PublicHeader render - Auth:', isAuthenticated, 'User:', user?.first_name, 'Loading:', isLoadingUser);
 
   return (
     <header className="border-b border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md fixed top-0 w-full z-50">
@@ -356,12 +384,6 @@ export const PublicHeader = () => {
                               </p>
                             </div>
                           )}
-                          <Link
-                            to="/create-task"
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            <Button className="w-full bg-primary hover:bg-primary/80">Create Task</Button>
-                          </Link>
                           <Link
                             to="/profile"
                             onClick={() => setIsMenuOpen(false)}

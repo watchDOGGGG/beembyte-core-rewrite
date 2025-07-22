@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { TrendingUp, Hash } from "lucide-react"
+import { API_BASE_URL } from "@/config/env"
 
 interface TrendingCategory {
   category: string
@@ -13,7 +14,7 @@ interface TrendingCategory {
 
 const getCategoryColor = (category: string) => {
   const colors = [
-    "bg-blue-500", "bg-green-500", "bg-purple-500", 
+    "bg-blue-500", "bg-green-500", "bg-purple-500",
     "bg-orange-500", "bg-red-500", "bg-teal-500",
     "bg-indigo-500", "bg-pink-500", "bg-cyan-500"
   ]
@@ -28,7 +29,7 @@ export const TrendingCategories: React.FC = () => {
   useEffect(() => {
     const fetchTrendingCategories = async () => {
       try {
-        const response = await fetch('http://localhost:7000/api/v1/feed/trending-category')
+        const response = await fetch(`${API_BASE_URL}/feed/trending-category`)
         if (response.ok) {
           const data = await response.json()
           setTrendingCategories(data.data || [])

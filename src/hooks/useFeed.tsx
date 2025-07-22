@@ -6,6 +6,7 @@ interface CreatePostPayload {
   title: string
   description: string
   images?: string[]
+  videos?: string[]
   category: string
   tags?: string[]
 }
@@ -24,6 +25,7 @@ interface FeedPost {
   title: string
   description: string
   images: string[]
+  videos?: string[]
   category: string
   tags: string[]
   total_score: number
@@ -195,11 +197,12 @@ export const useFeed = () => {
     })
   }
 
-  // Get suggested posts by user
-  const getSuggestedPostsByUser = (postId: string, userId: string) => {
+  // Get suggested posts by user - with enabled option
+  const getSuggestedPostsByUser = (postId: string, userId: string, options?: { enabled?: boolean }) => {
     return useQuery({
       queryKey: ['suggested-posts', postId, userId],
       queryFn: async () => {
+        if (!userId) return []
         const response = await fetch(`${API_BASE_URL}/feed/${postId}/${userId}/suggested-post-by-user`, {
           credentials: 'include',
           headers: {
@@ -210,6 +213,7 @@ export const useFeed = () => {
         const result = await response.json()
         return result.data || []
       },
+      enabled: options?.enabled !== false && !!userId && !!postId,
     })
   }
 
@@ -367,6 +371,7 @@ export const useFeed = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['comments', variables.postId] })
       queryClient.invalidateQueries({ queryKey: ['post', variables.postId] })
+      queryClient.invalidateQueries({ queryKey: ['feed'] })
     },
   })
 

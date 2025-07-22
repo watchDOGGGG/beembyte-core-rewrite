@@ -13,6 +13,7 @@ interface ScoreModalProps {
   postId: string
   currentUserScore?: number
   hasScored: boolean
+  onOptimisticUpdate?: (scoreChange: number, peopleChange: number) => void
 }
 
 export const ScoreModal: React.FC<ScoreModalProps> = ({
@@ -20,9 +21,10 @@ export const ScoreModal: React.FC<ScoreModalProps> = ({
   onClose,
   postId,
   currentUserScore = 0,
-  hasScored = false
+  hasScored = false,
+  onOptimisticUpdate
 }) => {
-  const [userScore, setUserScore] = useState<number[]>([currentUserScore])
+  const [userScore, setUserScore] = useState<number[]>([hasScored ? currentUserScore : 0])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
 
@@ -35,11 +37,22 @@ export const ScoreModal: React.FC<ScoreModalProps> = ({
     if (userScore[0] === 0) return
 
     setIsSubmitting(true)
+    
+    // Calculate the actual score change
+    const newScore = userScore[0]
+    const scoreChange = hasScored ? newScore - currentUserScore : newScore
+    const peopleChange = hasScored ? 0 : 1
+    
+    // Optimistic update
+    onOptimisticUpdate?.(scoreChange, peopleChange)
+    
     try {
       await scorePost({ postId, payload: { score: userScore[0] } })
       onClose()
     } catch (error) {
       console.error("Failed to submit score:", error)
+      // Revert optimistic update on error
+      onOptimisticUpdate?.(-scoreChange, -peopleChange)
     } finally {
       setIsSubmitting(false)
     }
@@ -47,17 +60,26 @@ export const ScoreModal: React.FC<ScoreModalProps> = ({
 
   const handleUnscore = async () => {
     setIsSubmitting(true)
+    
+    // Calculate the actual score change when removing score
+    const scoreDecrease = -currentUserScore
+    const peopleDecrease = -1
+    
+    // Optimistic update
+    onOptimisticUpdate?.(scoreDecrease, peopleDecrease)
+    
     try {
       await unscorePost(postId)
       setUserScore([0])
       onClose()
     } catch (error) {
       console.error("Failed to remove score:", error)
+      // Revert optimistic update on error
+      onOptimisticUpdate?.(-scoreDecrease, -peopleDecrease)
     } finally {
       setIsSubmitting(false)
     }
   }
-
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -65,9 +87,6 @@ export const ScoreModal: React.FC<ScoreModalProps> = ({
         <DialogHeader className="px-4 pt-4 pb-2">
           <DialogTitle className="flex items-center justify-between text-center">
             <span className="flex-1 text-lg font-semibold">People who reacted</span>
-            {/* <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
-              <X className="h-4 w-4" />
-            </Button> */}
           </DialogTitle>
         </DialogHeader>
 

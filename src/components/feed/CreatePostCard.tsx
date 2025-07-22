@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
-import { ImageIcon, Plus, Video } from "lucide-react"
+import { ImageIcon, Plus, Video, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -142,7 +142,7 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
         description: formData.description,
         images: imageUrls,
         videos: videoUrls,
-        category: formData.category,
+        category: formData.category || "other",
         tags: formData.tags,
       }
       
@@ -206,128 +206,70 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md mx-auto max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New Post</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Title Input */}
-            <div className="space-y-1">
-              <Label htmlFor="title" className="text-xs font-medium">
-                Title*
-              </Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Enter post title"
-                required
-                className="h-8 text-xs"
-              />
-            </div>
-
-            {/* Description Input */}
-            <div className="space-y-1">
-              <Label htmlFor="description" className="text-xs font-medium">
-                Description*
-              </Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe your post..."
-                required
-                className="min-h-[60px] text-xs resize-none"
-              />
-            </div>
-
-            {/* Category Select */}
-            <div className="space-y-1">
-              <Label htmlFor="category" className="text-xs font-medium">
-                Category*
-              </Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
-              >
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="development">Development</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="writing">Writing</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Tags Input */}
-            <div className="space-y-1">
-              <Label htmlFor="tags" className="text-xs font-medium">
-                Tags
-              </Label>
-              <Input
-                id="tags"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={handleTagKeyDown}
-                placeholder="Add tags (press Enter to add)"
-                className="h-8 text-xs"
-              />
-              {formData.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {formData.tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs px-1.5 py-0.5">
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => removeTag(tag)}
-                        className="ml-1 text-gray-500 hover:text-gray-700"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Image Upload */}
-            <div className="space-y-1">
-              <Label className="text-xs font-medium">Images</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  id="image-upload"
-                />
-                <label htmlFor="image-upload" className="cursor-pointer">
-                  <div className="flex flex-col items-center space-y-1">
-                    <ImageIcon className="h-6 w-6 text-gray-400" />
-                    <span className="text-xs text-gray-600">Click to upload images</span>
-                  </div>
-                </label>
+        <DialogContent className="max-w-xl mx-auto max-h-[90vh] overflow-hidden p-0">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b">
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={dicebearUrl || "/placeholder.svg"} alt={user.first_name || "User"} />
+                <AvatarFallback>
+                  {user.first_name?.substring(0, 2).toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  {user.first_name} {user.last_name}
+                </h3>
+                <p className="text-sm text-gray-500">Post to feed</p>
               </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsModalOpen(false)}
+              className="h-8 w-8"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col h-full">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {/* Title Input */}
+              <div className="space-y-2">
+                <Input
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="What's the title of your post?"
+                  required
+                  className="text-lg font-medium border-0 p-0 focus:ring-0 focus:border-0 placeholder:text-gray-400"
+                />
+              </div>
+
+              {/* Description Input */}
+              <div className="space-y-2">
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="What do you want to talk about? (Optional)"
+                  className="min-h-[120px] border-0 p-0 focus:ring-0 focus:border-0 resize-none placeholder:text-gray-400 text-base"
+                />
+              </div>
+
               {/* Image Previews */}
               {imagePreviews.length > 0 && (
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-2 gap-3">
                   {imagePreviews.map((preview, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative group">
                       <img
                         src={preview || "/placeholder.svg"}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-20 object-cover rounded border"
+                        className="w-full h-32 object-cover rounded-lg"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs hover:bg-red-600"
+                        className="absolute top-2 right-2 bg-gray-900/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-gray-900 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         ×
                       </button>
@@ -335,35 +277,15 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
                   ))}
                 </div>
               )}
-            </div>
 
-            {/* Video Upload */}
-            <div className="space-y-1">
-              <Label className="text-xs font-medium">Videos</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
-                <input
-                  type="file"
-                  multiple
-                  accept="video/*"
-                  onChange={handleVideoUpload}
-                  className="hidden"
-                  id="video-upload"
-                />
-                <label htmlFor="video-upload" className="cursor-pointer">
-                  <div className="flex flex-col items-center space-y-1">
-                    <Video className="h-6 w-6 text-gray-400" />
-                    <span className="text-xs text-gray-600">Click to upload videos</span>
-                  </div>
-                </label>
-              </div>
               {/* Video Previews */}
               {videoPreviews.length > 0 && (
-                <div className="grid grid-cols-1 gap-2 mt-2">
+                <div className="space-y-3">
                   {videoPreviews.map((preview, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative group">
                       <video
                         src={preview}
-                        className="w-full h-32 object-contain bg-black/5 dark:bg-black/20 rounded border"
+                        className="w-full h-48 object-contain bg-gray-100 dark:bg-gray-800 rounded-lg"
                         controls
                         muted
                         preload="metadata"
@@ -371,7 +293,7 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
                       <button
                         type="button"
                         onClick={() => removeVideo(index)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs hover:bg-red-600"
+                        className="absolute top-2 right-2 bg-gray-900/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-gray-900 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         ×
                       </button>
@@ -379,25 +301,126 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
                   ))}
                 </div>
               )}
+
+              {/* Category and Tags - Collapsible Section */}
+              <div className="space-y-4 pt-4 border-t">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Category Select */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Category
+                    </Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) => setFormData({ ...formData, category: value })}
+                    >
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="design">Design</SelectItem>
+                        <SelectItem value="development">Development</SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="business">Business</SelectItem>
+                        <SelectItem value="writing">Writing</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Tags Input */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Tags
+                    </Label>
+                    <Input
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={handleTagKeyDown}
+                      placeholder="Add tags (press Enter)"
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+
+                {/* Tags Display */}
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="px-3 py-1">
+                        #{tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="ml-2 text-gray-500 hover:text-gray-700"
+                        >
+                          ×
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end space-x-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsModalOpen(false)}
-                className="h-8 px-3 text-xs"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting || isCreating || isUploading || !formData.title || !formData.description}
-                className="h-8 px-3 text-xs"
-              >
-                {isSubmitting || isUploading ? "Uploading..." : isCreating ? "Creating..." : "Create Post"}
-              </Button>
+            {/* Footer */}
+            <div className="border-t p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1">
+                  {/* Media Upload Buttons */}
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <label htmlFor="image-upload">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 w-10 p-0"
+                      asChild
+                    >
+                      <div className="cursor-pointer">
+                        <ImageIcon className="h-5 w-5 text-gray-600" />
+                      </div>
+                    </Button>
+                  </label>
+
+                  <input
+                    type="file"
+                    multiple
+                    accept="video/*"
+                    onChange={handleVideoUpload}
+                    className="hidden"
+                    id="video-upload"
+                  />
+                  <label htmlFor="video-upload">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 w-10 p-0"
+                      asChild
+                    >
+                      <div className="cursor-pointer">
+                        <Video className="h-5 w-5 text-gray-600" />
+                      </div>
+                    </Button>
+                  </label>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || isCreating || isUploading || !formData.title.trim()}
+                  className="px-6"
+                >
+                  {isSubmitting || isUploading ? "Uploading..." : isCreating ? "Creating..." : "Post"}
+                </Button>
+              </div>
             </div>
           </form>
         </DialogContent>

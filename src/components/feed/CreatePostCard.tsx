@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { useFeed } from "@/hooks/useFeed"
 import { useFileUpload } from "@/hooks/useFileUpload"
 import type { User } from "@/types"
@@ -206,9 +207,9 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-xl mx-auto max-h-[90vh] overflow-hidden p-0">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b">
+        <DialogContent className="max-w-xl mx-auto max-h-[90vh] overflow-hidden p-0 flex flex-col">
+          {/* Header - Fixed */}
+          <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
             <div className="flex items-center space-x-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={dicebearUrl || "/placeholder.svg"} alt={user.first_name || "User"} />
@@ -223,148 +224,143 @@ export const CreatePostCard: React.FC<CreatePostCardProps> = ({ user, onPostCrea
                 <p className="text-sm text-gray-500">Post to feed</p>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsModalOpen(false)}
-              className="h-8 w-8"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {/* Title Input */}
-              <div className="space-y-2">
-                <Input
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="What's the title of your post?"
-                  required
-                  className="text-lg font-medium border-0 p-0 focus:ring-0 focus:border-0 placeholder:text-gray-400"
-                />
-              </div>
-
-              {/* Description Input */}
-              <div className="space-y-2">
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="What do you want to talk about? (Optional)"
-                  className="min-h-[120px] border-0 p-0 focus:ring-0 focus:border-0 resize-none placeholder:text-gray-400 text-base"
-                />
-              </div>
-
-              {/* Image Previews */}
-              {imagePreviews.length > 0 && (
-                <div className="grid grid-cols-2 gap-3">
-                  {imagePreviews.map((preview, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={preview || "/placeholder.svg"}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-2 right-2 bg-gray-900/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-gray-900 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Video Previews */}
-              {videoPreviews.length > 0 && (
-                <div className="space-y-3">
-                  {videoPreviews.map((preview, index) => (
-                    <div key={index} className="relative group">
-                      <video
-                        src={preview}
-                        className="w-full h-48 object-contain bg-gray-100 dark:bg-gray-800 rounded-lg"
-                        controls
-                        muted
-                        preload="metadata"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeVideo(index)}
-                        className="absolute top-2 right-2 bg-gray-900/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-gray-900 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Category and Tags - Collapsible Section */}
-              <div className="space-y-4 pt-4 border-t">
-                <div className="grid md:grid-cols-2 gap-4">
-                  {/* Category Select */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Category
-                    </Label>
-                    <Select
-                      value={formData.category}
-                      onValueChange={(value) => setFormData({ ...formData, category: value })}
-                    >
-                      <SelectTrigger className="h-10">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="design">Design</SelectItem>
-                        <SelectItem value="development">Development</SelectItem>
-                        <SelectItem value="marketing">Marketing</SelectItem>
-                        <SelectItem value="business">Business</SelectItem>
-                        <SelectItem value="writing">Writing</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Tags Input */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Tags
-                    </Label>
-                    <Input
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyDown={handleTagKeyDown}
-                      placeholder="Add tags (press Enter)"
-                      className="h-10"
-                    />
-                  </div>
+          <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+            {/* Scrollable Content */}
+            <ScrollArea className="flex-1 px-6">
+              <div className="space-y-4 py-4">
+                {/* Title Input */}
+                <div className="space-y-2">
+                  <Input
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="What's the title of your post?"
+                    required
+                    className="text-lg font-medium border-0 p-0 focus:ring-0 focus:border-0 placeholder:text-gray-400"
+                  />
                 </div>
 
-                {/* Tags Display */}
-                {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="px-3 py-1">
-                        #{tag}
+                {/* Description Input */}
+                <div className="space-y-2">
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="What do you want to talk about? (Optional)"
+                    className="min-h-[120px] border-0 p-0 focus:ring-0 focus:border-0 resize-none placeholder:text-gray-400 text-base"
+                  />
+                </div>
+
+                {/* Image Previews */}
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={preview || "/placeholder.svg"}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
                         <button
                           type="button"
-                          onClick={() => removeTag(tag)}
-                          className="ml-2 text-gray-500 hover:text-gray-700"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-2 right-2 bg-gray-900/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-gray-900 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           ×
                         </button>
-                      </Badge>
+                      </div>
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
 
-            {/* Footer */}
-            <div className="border-t p-4">
+                {/* Video Previews */}
+                {videoPreviews.length > 0 && (
+                  <div className="space-y-3">
+                    {videoPreviews.map((preview, index) => (
+                      <div key={index} className="relative group">
+                        <video
+                          src={preview}
+                          className="w-full h-48 object-contain bg-gray-100 dark:bg-gray-800 rounded-lg"
+                          controls
+                          muted
+                          preload="metadata"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeVideo(index)}
+                          className="absolute top-2 right-2 bg-gray-900/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-gray-900 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Category and Tags - Collapsible Section */}
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Category Select */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Category
+                      </Label>
+                      <Select
+                        value={formData.category}
+                        onValueChange={(value) => setFormData({ ...formData, category: value })}
+                      >
+                        <SelectTrigger className="h-10">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="design">Design</SelectItem>
+                          <SelectItem value="development">Development</SelectItem>
+                          <SelectItem value="marketing">Marketing</SelectItem>
+                          <SelectItem value="business">Business</SelectItem>
+                          <SelectItem value="writing">Writing</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Tags Input */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Tags
+                      </Label>
+                      <Input
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyDown={handleTagKeyDown}
+                        placeholder="Add tags (press Enter)"
+                        className="h-10"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tags Display */}
+                  {formData.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {formData.tags.map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="px-3 py-1">
+                          #{tag}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag)}
+                            className="ml-2 text-gray-500 hover:text-gray-700"
+                          >
+                            ×
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </ScrollArea>
+
+            {/* Footer - Fixed */}
+            <div className="border-t p-4 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1">
                   {/* Media Upload Buttons */}

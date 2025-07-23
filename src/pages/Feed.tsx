@@ -4,6 +4,7 @@ import { FeedCard } from "@/components/feed/FeedCard"
 import { CreatePostCard } from "@/components/feed/CreatePostCard"
 import { WeeklyTopResponders } from "@/components/feed/WeeklyTopResponders"
 import { TrendingCategories } from "@/components/feed/TrendingCategories"
+import { SuggestedUsers } from "@/components/feed/SuggestedUsers"
 import { FeedActionButton } from "@/components/feed/FeedActionButton"
 import { useAuth } from "@/hooks/useAuth"
 import { useFeed } from "@/hooks/useFeed"
@@ -341,6 +342,8 @@ const Feed = () => {
             {/* Sidebar - Only show on large screens */}
             <div className="hidden lg:block lg:w-80 lg:flex-shrink-0 lg:pt-3 lg:ml-0">
               <div className="sticky top-20 space-y-4">
+                {/* Suggested Users Section */}
+                <SuggestedUsers />
                 {/* Top Responders Section */}
                 <WeeklyTopResponders />
                 {/* Categories Section */}

@@ -16,6 +16,7 @@ import HelpCenter from "./pages/HelpCenter"
 import Index from "./pages/Index"
 import { Layout } from "./components/layout/Layout"
 import Profile from "./pages/Profile"
+import UserProfile from "./pages/UserProfile"
 import TaskHistory from "./pages/TaskHistory"
 import TaskDetail from "./pages/TaskDetail"
 import CreateTask from "./pages/CreateTask"
@@ -191,6 +192,16 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <Profile />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/:userId"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <UserProfile />
               </Layout>
             </ProtectedRoute>
           }

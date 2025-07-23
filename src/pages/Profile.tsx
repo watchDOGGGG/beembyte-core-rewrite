@@ -117,6 +117,13 @@ const Profile = () => {
           >
             🌟 Explore Feed
           </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/chat')}
+            className="justify-start hover:bg-primary hover:text-white transition-colors text-xs sm:text-sm p-2 sm:p-3"
+          >
+            💬 Messages
+          </Button>
         </div>
       </Card>
     </div>

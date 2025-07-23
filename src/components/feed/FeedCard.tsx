@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Heart, MessageCircle, Share2, Star, ChevronLeft, ChevronRight, Trash2, Check, MoreHorizontal } from "lucide-react"
+import { Heart, MessageCircle, Share2, Star, ChevronLeft, ChevronRight, Trash2, Check, MoreHorizontal, Send } from "lucide-react"
 import { getMediaType } from "@/utils/mediaUtils"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -231,7 +231,13 @@ export const FeedCard: React.FC<FeedCardProps> = ({
         {/* User Header - With padding and color coding */}
         <div className="px-3 sm:px-4 py-2.5">
           <div className="flex items-center space-x-2.5">
-            <Avatar className="h-8 w-8 flex-shrink-0">
+            <Avatar 
+              className="h-8 w-8 flex-shrink-0 cursor-pointer" 
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/profile/${post.user_id}`);
+              }}
+            >
               <AvatarImage
                 src={`https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(post.user.first_name)}`}
                 alt={`${post.user.first_name} ${post.user.last_name}`}
@@ -244,7 +250,14 @@ export const FeedCard: React.FC<FeedCardProps> = ({
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1.5">
-                  <h4 className="font-semibold text-gray-900 dark:text-white truncate" style={{ fontSize: '12px' }}>
+                  <h4 
+                    className="font-semibold text-gray-900 dark:text-white truncate cursor-pointer hover:underline" 
+                    style={{ fontSize: '12px' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/profile/${post.user_id}`);
+                    }}
+                  >
                     {post.user.first_name} {post.user.last_name}
                   </h4>
                   {post.user.is_vetted && (
@@ -285,15 +298,27 @@ export const FeedCard: React.FC<FeedCardProps> = ({
               </div>
               <LinkupCount userId={post.user_id} className="mb-1" />
             </div>
-            {/* Menu Dropdown - Only show for post owner */}
-            {isOwner && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 z-50">
+            {/* Menu Dropdown - Show for everyone */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 z-50">
+                {!isOwner && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/chat/user/${post.user_id}`);
+                    }}
+                    className="hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    Message
+                  </DropdownMenuItem>
+                )}
+                {isOwner && (
                   <DropdownMenuItem
                     onClick={handleDeletePost}
                     className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -301,9 +326,9 @@ export const FeedCard: React.FC<FeedCardProps> = ({
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete Post
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 

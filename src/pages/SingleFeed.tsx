@@ -289,7 +289,10 @@ export const SingleFeed: React.FC = () => {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4 mb-4">
-                  <Avatar className="h-16 w-16">
+                  <Avatar 
+                    className="h-16 w-16 cursor-pointer"
+                    onClick={() => navigate(`/profile/${post.user_id}`)}
+                  >
                     <AvatarImage
                       src={`https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(post.user.first_name)}`}
                       alt={`${post.user.first_name} ${post.user.last_name}`}
@@ -301,10 +304,26 @@ export const SingleFeed: React.FC = () => {
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold" style={{ fontSize: '18px' }}>
+                      <h3 
+                        className="font-semibold cursor-pointer hover:underline" 
+                        style={{ fontSize: '18px' }}
+                        onClick={() => navigate(`/profile/${post.user_id}`)}
+                      >
                         {post.user.first_name} {post.user.last_name}
                       </h3>
-                      <LinkupButton userId={post.user_id} />
+                      <div className="flex items-center gap-2">
+                        {!isOwner && (
+                          <Button 
+                            size="sm"
+                            onClick={() => navigate(`/chat/user/${post.user_id}`)}
+                            className="flex items-center gap-1"
+                          >
+                            <MessageCircle className="h-3 w-3" />
+                            Message
+                          </Button>
+                        )}
+                        <LinkupButton userId={post.user_id} />
+                      </div>
                     </div>
                     <LinkupCount userId={post.user_id} className="mb-2" />
                     {post.user.is_vetted && post.user.responder_info && (

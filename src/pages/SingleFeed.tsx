@@ -182,9 +182,9 @@ export const SingleFeed: React.FC = () => {
                         <VideoPlayer
                           src={video}
                           className="w-full h-[60vh] lg:h-[70vh]"
-                          enableScrollAutoPlay={true}
-                          enablePictureInPicture={true}
-                          autoPlayWithSound={true}
+                          enableScrollAutoPlay={false}
+                          enablePictureInPicture={false}
+                          autoPlayWithSound={false}
                         />
                       </div>
                     ))}

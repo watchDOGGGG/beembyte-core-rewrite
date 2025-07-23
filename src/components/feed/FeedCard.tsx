@@ -389,9 +389,9 @@ export const FeedCard: React.FC<FeedCardProps> = ({
                         <VideoPlayer
                           src={media.url}
                           className={`w-full ${isCarousel ? "h-full" : "h-[400px]"}`}
-                          enableScrollAutoPlay={true}
-                          enablePictureInPicture={true}
-                          autoPlayWithSound={true}
+                          enableScrollAutoPlay={false}
+                          enablePictureInPicture={false}
+                          autoPlayWithSound={false}
                         />
                       )}
                     </div>

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageCircle, Check, Star } from 'lucide-react';
@@ -157,14 +156,14 @@ const UserProfile: React.FC = () => {
                     <LinkupCount userId={user.user_id} className="mb-2" />
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 h-9">
                     {!isOwnProfile && (
                       <>
                         <Button 
                           onClick={handleMessage}
                           variant="outline"
                           size="sm"
-                          className="flex items-center gap-1 bg-white hover:bg-white border-gray-300"
+                          className="flex items-center gap-1 bg-white hover:bg-white border-gray-300 h-9"
                         >
                           <MessageCircle className="h-4 w-4" />
                           <span className="text-xs">Message</span>
@@ -176,6 +175,7 @@ const UserProfile: React.FC = () => {
                       <Button 
                         variant="outline"
                         onClick={() => navigate('/profile')}
+                        className="h-9"
                       >
                         Edit Profile
                       </Button>

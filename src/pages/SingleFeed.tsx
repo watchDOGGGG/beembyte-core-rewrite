@@ -320,14 +320,14 @@ export const SingleFeed: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-3 h-9">
                       {!isOwner && (
                         <>
                           <Button 
                             variant="outline"
                             size="sm"
                             onClick={() => navigate(`/chat/user/${post.user_id}`)}
-                            className="flex items-center gap-1 bg-white hover:bg-white border-gray-300"
+                            className="flex items-center gap-1 bg-white hover:bg-white border-gray-300 h-9"
                           >
                             <MessageCircle className="h-4 w-4" />
                             <span className="text-xs">Message</span>

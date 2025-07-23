@@ -1,4 +1,3 @@
-
 import React, { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { ArrowLeft, Star, ChevronLeft, ChevronRight, Share2, MessageCircle, Check, MoreHorizontal, Trash2 } from "lucide-react"
@@ -303,46 +302,53 @@ export const SingleFeed: React.FC = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 
-                        className="font-semibold cursor-pointer hover:underline" 
-                        style={{ fontSize: '18px' }}
-                        onClick={() => navigate(`/profile/${post.user_id}`)}
-                      >
-                        {post.user.first_name} {post.user.last_name}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        {!isOwner && (
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h3 
+                          className="font-semibold cursor-pointer hover:underline mb-1" 
+                          style={{ fontSize: '16px' }}
+                          onClick={() => navigate(`/profile/${post.user_id}`)}
+                        >
+                          {post.user.first_name} {post.user.last_name}
+                        </h3>
+                        <p className="text-muted-foreground text-sm mb-1">
+                          {post.user.is_vetted && post.user.responder_info?.job_title 
+                            ? post.user.responder_info.job_title 
+                            : 'Community Member'}
+                        </p>
+                        <LinkupCount userId={post.user_id} className="mb-2" />
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mb-3">
+                      {!isOwner && (
+                        <>
                           <Button 
                             size="sm"
                             onClick={() => navigate(`/chat/user/${post.user_id}`)}
-                            className="flex items-center gap-1"
+                            className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
                           >
-                            <MessageCircle className="h-3 w-3" />
+                            <MessageCircle className="h-4 w-4" />
                             Message
                           </Button>
-                        )}
-                        <LinkupButton userId={post.user_id} />
-                      </div>
+                          <LinkupButton userId={post.user_id} />
+                        </>
+                      )}
                     </div>
-                    <LinkupCount userId={post.user_id} className="mb-2" />
+
                     {post.user.is_vetted && post.user.responder_info && (
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         <div className="flex items-center space-x-2">
                           <Check className="h-4 w-4 text-green-600" />
                           <span className="text-green-600 font-medium" style={{ fontSize: '12px' }}>
                             Vetted Verified
                           </span>
                         </div>
-                        <p className="text-muted-foreground" style={{ fontSize: '14px' }}>
-                          {post.user.responder_info.job_title}
-                        </p>
                         {post.user.responder_info.rank_status && (
                           <Badge
                             variant="outline"
-                            className="capitalize"
+                            className="capitalize text-xs"
                             style={{
-                              fontSize: '12px',
                               backgroundColor: post.user.responder_info.rank_status.rank_color + '20',
                               borderColor: post.user.responder_info.rank_status.rank_color,
                               color: post.user.responder_info.rank_status.rank_color
@@ -353,11 +359,9 @@ export const SingleFeed: React.FC = () => {
                         )}
                       </div>
                     )}
+
                     {!post.user.is_vetted && (
                       <div className="space-y-1">
-                        <p className="text-muted-foreground" style={{ fontSize: '14px' }}>
-                          Community Member
-                        </p>
                         <p className="text-muted-foreground" style={{ fontSize: '12px' }}>
                           Joined {new Date(post.created_at).toLocaleDateString()}
                         </p>
@@ -367,20 +371,22 @@ export const SingleFeed: React.FC = () => {
                 </div>
 
                 {/* Stats */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {post.user.is_vetted && post.user.responder_info && (
-                    <>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground" style={{ fontSize: '12px' }}>Experience:</span>
-                        <span style={{ fontSize: '12px' }}>{post.user.responder_info.years_of_experience} years</span>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-muted-foreground">Experience:</span>
+                        <div className="font-medium">{post.user.responder_info.years_of_experience} years</div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground" style={{ fontSize: '12px' }}>Status:</span>
-                        <Badge variant="outline" className="text-green-600" style={{ fontSize: '12px' }}>
-                          {post.user.responder_info.availability_status}
-                        </Badge>
+                      <div>
+                        <span className="text-muted-foreground">Status:</span>
+                        <div>
+                          <Badge variant="outline" className="text-green-600 text-xs">
+                            {post.user.responder_info.availability_status}
+                          </Badge>
+                        </div>
                       </div>
-                    </>
+                    </div>
                   )}
                 </div>
               </CardContent>

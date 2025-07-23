@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageCircle, Check, Star } from 'lucide-react';
@@ -140,30 +141,31 @@ const UserProfile: React.FC = () => {
               </Avatar>
 
               <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                  <div>
-                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                  <div className="mb-4 md:mb-0">
+                    <h1 className="text-2xl font-bold flex items-center gap-2 mb-1">
                       {user.first_name} {user.last_name}
                       {user.is_vetted && (
                         <Check className="h-5 w-5 text-green-600" />
                       )}
                     </h1>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground text-sm mb-2">
                       {user.is_vetted && user.responder_info?.job_title 
                         ? user.responder_info.job_title 
                         : 'Community Member'}
                     </p>
+                    <LinkupCount userId={user.user_id} className="mb-2" />
                   </div>
 
-                  <div className="flex items-center gap-2 mt-4 md:mt-0">
+                  <div className="flex items-center gap-2">
                     {!isOwnProfile && (
                       <>
                         <Button 
                           onClick={handleMessage}
                           size="sm"
-                          className="flex items-center gap-1"
+                          className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
                         >
-                          <MessageCircle className="h-3 w-3" />
+                          <MessageCircle className="h-4 w-4" />
                           Message
                         </Button>
                         <LinkupButton userId={user.user_id} />
@@ -180,14 +182,12 @@ const UserProfile: React.FC = () => {
                   </div>
                 </div>
 
-                <LinkupCount userId={user.user_id} className="mb-4" />
-
                 {user.is_vetted && user.responder_info && (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {user.responder_info.rank_status && (
                       <Badge
                         variant="outline"
-                        className="capitalize"
+                        className="capitalize text-xs"
                         style={{
                           backgroundColor: user.responder_info.rank_status.rank_color + '20',
                           borderColor: user.responder_info.rank_status.rank_color,
@@ -198,28 +198,35 @@ const UserProfile: React.FC = () => {
                       </Badge>
                     )}
                     
-                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                        <span>{user.responder_info.years_of_experience} years experience</span>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-muted-foreground">Experience:</span>
+                        <div className="font-medium">{user.responder_info.years_of_experience} years</div>
                       </div>
-                      <Badge variant="outline" className="text-green-600">
-                        {user.responder_info.availability_status}
-                      </Badge>
+                      <div>
+                        <span className="text-muted-foreground">Status:</span>
+                        <div>
+                          <Badge variant="outline" className="text-green-600 text-xs">
+                            {user.responder_info.availability_status}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
 
                     {user.responder_info.skills && user.responder_info.skills.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {user.responder_info.skills.slice(0, 5).map((skill, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {skill}
-                          </Badge>
-                        ))}
-                        {user.responder_info.skills.length > 5 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{user.responder_info.skills.length - 5} more
-                          </Badge>
-                        )}
+                      <div className="mt-3">
+                        <div className="flex flex-wrap gap-1">
+                          {user.responder_info.skills.slice(0, 5).map((skill, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {skill}
+                            </Badge>
+                          ))}
+                          {user.responder_info.skills.length > 5 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{user.responder_info.skills.length - 5} more
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

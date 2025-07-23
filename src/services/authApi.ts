@@ -295,6 +295,40 @@ export const authApi = {
     }
   },
 
+  // Handle Google OAuth callback with authorization code
+  handleGoogleOAuthCallback: async (code: string, state?: string): Promise<AuthResponse> => {
+    try {
+      console.log("🌐 Making Google OAuth callback request to:", `${API_BASE_URL}/users/google-oauth-callback`);
+      
+      const response = await fetch(`${API_BASE_URL}/users/google-oauth-callback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code, state }),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+      
+      // Handle auth token setting like in regular login
+      if (data.success && data.data?.auth_token) {
+        const hasAuthCookie = document.cookie.includes('authToken=');
+        if (!hasAuthCookie) {
+          setAuthTokenManually(data.data.auth_token);
+        }
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Google OAuth callback error:", error);
+      return {
+        success: false,
+        message: "Google OAuth authentication failed. Please try again.",
+      };
+    }
+  },
+
   // Handle OAuth callback (keep for backward compatibility)
   handleOAuthCallback: async (code: string, state?: string): Promise<AuthResponse> => {
     try {

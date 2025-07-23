@@ -1,4 +1,3 @@
-
 import {
   ArrowRight,
   BadgeCheck,
@@ -16,13 +15,21 @@ import {
 
 export const landingPageData = [
   {
+    title: "Community-Powered Sharing",
+    description:
+      "Share your work, ideas, and projects with a supportive network of creators and professionals.",
+    icon: Users,
+  },
+  {
     title: "Secure Messaging",
-    description: "End-to-end encrypted communication with experts for every task",
+    description:
+      "End-to-end encrypted communication with experts for every task",
     icon: MessageSquare,
   },
   {
     title: "Fast Turnaround",
-    description: "Most tasks are completed within 24-48 hours by qualified experts",
+    description:
+      "Most tasks are completed within 24-48 hours by qualified experts",
     icon: Clock,
   },
   {
@@ -36,18 +43,15 @@ export const landingPageData = [
     icon: LineChart,
   },
   {
-    title: "Quality Guarantee",
-    description: "Satisfaction guaranteed or your money back on all tasks",
-    icon: BadgeCheck,
-  },
-  {
     title: "Data Protection",
-    description: "Enterprise-grade encryption for all your sensitive information",
+    description:
+      "Enterprise-grade encryption for all your sensitive information",
     icon: ShieldCheck,
   },
   {
     title: "Vetted Experts",
-    description: "Access to thousands of verified professionals across specialties",
+    description:
+      "Access to thousands of verified professionals across specialties",
     icon: Users,
   },
   {
@@ -65,7 +69,8 @@ export const expertBenefits = [
   },
   {
     title: "Fair Compensation",
-    description: "Competitive rates based on task complexity and your expertise",
+    description:
+      "Competitive rates based on task complexity and your expertise",
     icon: CreditCard,
   },
   {

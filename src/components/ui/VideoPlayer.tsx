@@ -1,9 +1,10 @@
 
 import React, { useRef, useState, useEffect } from 'react'
-import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward } from 'lucide-react'
+import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, Loader2 } from 'lucide-react'
 import { Button } from './button'
 import { Slider } from './slider'
 import { useVideoAutoPlay } from '@/hooks/useVideoAutoPlay'
+import { useVideoContext } from '@/context/VideoContext'
 
 interface VideoPlayerProps {
   src: string
@@ -31,7 +32,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(autoPlayWithSound ? 0.8 : 1)
   const [showControls, setShowControls] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasNetworkError, setHasNetworkError] = useState(false)
   const controlsTimeoutRef = useRef<NodeJS.Timeout>()
+  const { setCurrentVideo } = useVideoContext()
 
   // Use auto-play hook if enabled
   const autoPlayResult = enableScrollAutoPlay ? useVideoAutoPlay(
@@ -73,12 +77,41 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       console.log('Video ended')
       setIsPlaying(false)
     }
+
+    const handleLoadStart = () => {
+      setIsLoading(true)
+      setHasNetworkError(false)
+    }
+
+    const handleCanPlay = () => {
+      setIsLoading(false)
+      setHasNetworkError(false)
+    }
+
+    const handleWaiting = () => {
+      setIsLoading(true)
+    }
+
+    const handleError = () => {
+      setIsLoading(false)
+      setHasNetworkError(true)
+      console.error('Video playback error')
+    }
+
+    const handleStalled = () => {
+      setIsLoading(true)
+    }
     
     video.addEventListener('timeupdate', updateTime)
     video.addEventListener('loadedmetadata', updateDuration)
     video.addEventListener('ended', handleEnded)
     video.addEventListener('play', handlePlay)
     video.addEventListener('pause', handlePause)
+    video.addEventListener('loadstart', handleLoadStart)
+    video.addEventListener('canplay', handleCanPlay)
+    video.addEventListener('waiting', handleWaiting)
+    video.addEventListener('error', handleError)
+    video.addEventListener('stalled', handleStalled)
 
     return () => {
       video.removeEventListener('timeupdate', updateTime)
@@ -86,6 +119,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       video.removeEventListener('ended', handleEnded)
       video.removeEventListener('play', handlePlay)
       video.removeEventListener('pause', handlePause)
+      video.removeEventListener('loadstart', handleLoadStart)
+      video.removeEventListener('canplay', handleCanPlay)
+      video.removeEventListener('waiting', handleWaiting)
+      video.removeEventListener('error', handleError)
+      video.removeEventListener('stalled', handleStalled)
     }
   }, [autoPlayWithSound])
 
@@ -96,7 +134,12 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     if (isPlaying) {
       video.pause()
     } else {
-      video.play()
+      // Set this video as the current playing video
+      setCurrentVideo(video)
+      video.play().catch((error) => {
+        console.error('Error playing video:', error)
+        setHasNetworkError(true)
+      })
     }
   }
 
@@ -194,7 +237,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         }`}
       >
         {/* Play Button Overlay */}
-        {!isPlaying && (
+        {!isPlaying && !isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <Button
               size="lg"
@@ -204,6 +247,35 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             >
               <Play className="h-8 w-8 text-white fill-white" />
             </Button>
+          </div>
+        )}
+
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-black/50 rounded-full p-4 backdrop-blur-sm">
+              <Loader2 className="h-8 w-8 text-white animate-spin" />
+            </div>
+          </div>
+        )}
+
+        {/* Network Error Indicator */}
+        {hasNetworkError && !isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-red-500/20 rounded-lg p-4 backdrop-blur-sm border border-red-500/30">
+              <p className="text-white text-sm text-center">Network error. Tap to retry.</p>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="mt-2 w-full bg-white/20 hover:bg-white/30 border border-white/20"
+                onClick={() => {
+                  setHasNetworkError(false)
+                  togglePlay()
+                }}
+              >
+                Retry
+              </Button>
+            </div>
           </div>
         )}
         

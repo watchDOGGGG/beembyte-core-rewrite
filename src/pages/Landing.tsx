@@ -43,16 +43,16 @@ const Landing = () => {
             <div>
               <div className="space-y-6">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                  The Fastest Way to Get Work Done<span className="text-primary">.</span>
+                  Your Space to Share, Delegate, and Connect<span className="text-primary">.</span>
                 </h1>
                 <h2 className="text-3xl md:text-4xl font-bold text-primary">
-                  The Intelligent Task Platform
+                  What’s Your Team Working On?
                   <br />
-                  For Smart Delegation and Fast Results<span className="text-primary">.</span>
+                  Show the World What You’re Building<span className="text-primary">.</span>
                 </h2>
                 <p className="text-medium text-gray-600 dark:text-gray-400">
-                  Beembyte connects you with trusted experts who handle your tasks — from research to technical work —
-                  so you can stay focused while the work gets done, fast and stress-free.
+                  Beembyte is more than a task platform — it’s a vibrant space where professionals post updates, showcase projects, and collaborate with trusted experts.
+                  Whether you're sharing progress or looking to delegate work, Beembyte brings your ideas to life — faster, easier, and with real community support.
                 </p>
               </div>
 
@@ -64,7 +64,7 @@ const Landing = () => {
                       size="lg"
                       className="bg-primary hover:bg-primary/90 text-base py-6 px-8"
                     >
-                      Start delegating tasks
+                      Start sharing
                     </Button>
                     <Button
                       onClick={() => window.open(RESPONDER_BASE_URL, "_blank")}
@@ -157,36 +157,37 @@ const Landing = () => {
             {[
               {
                 icon: <FileType2 className="h-8 w-8 text-primary" />,
-                title: "Research Tasks",
-                description: "Market research, academic papers, competitive analysis, and literature reviews",
+                title: "Project Showcases",
+                description: "Share your completed work, in-progress ideas, or personal portfolio updates with the community.",
               },
               {
                 icon: <Settings className="h-8 w-8 text-primary" />,
-                title: "Technical Tasks",
-                description: "Code reviews, debugging, technical documentation, and problem-solving",
+                title: "Technical Demos",
+                description: "From bug fixes to full builds, show your process, seek help, or teach others through your posts.",
               },
               {
                 icon: <Award className="h-8 w-8 text-primary" />,
-                title: "Content Creation",
-                description: "Articles, blog posts, marketing content, and editing services",
+                title: "Creative Content",
+                description: "Post your designs, writing, videos, and other creative work to get feedback and visibility.",
               },
               {
                 icon: <LineChart className="h-8 w-8 text-primary" />,
-                title: "Data Analysis",
-                description: "Statistical analysis, data cleaning, visualization, and interpretation",
+                title: "Insights & Learnings",
+                description: "Share lessons learned, data insights, or breakdowns from your recent work or research.",
               },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm hover:shadow-md transition-all"
-              >
-                <div className="rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center mb-6">
-                  {item.icon}
+            ]
+              .map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm hover:shadow-md transition-all"
+                >
+                  <div className="rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center mb-6">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{item.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">{item.description}</p>
                 </div>
-                <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400">{item.description}</p>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </section>
@@ -211,8 +212,8 @@ const Landing = () => {
           {/* Three feature boxes */}
           <div className="grid md:grid-cols-3 gap-6 mt-16">
             <div className="bg-gray-800 p-8 rounded-lg">
-              <h3 className="text-2xl font-bold mb-4 text-white">Multiple Task Types</h3>
-              <p className="text-gray-300 mb-4">From quick research briefs to complex data analysis projects</p>
+              <h3 className="text-2xl font-bold mb-4 text-white">Diverse Post Types</h3>
+              <p className="text-gray-300 mb-4">From project showcases and updates to questions, thoughts, and inspiration — share what matters to you.</p>
               <div className="mt-6">
                 <img
                   src="https://res.cloudinary.com/dxayyjtsq/image/upload/v1751716594/Multitasks_gradient_cpr8hy.png"

@@ -265,65 +265,6 @@ export const useAuth = () => {
     }
   };
 
-  const handleOAuthCallback = async (code: string, state?: string) => {
-    setIsLoading(true);
-    try {
-      console.log("🔐 Processing OAuth callback...");
-      const response = await authApi.handleOAuthCallback(code, state);
-
-      if (response.success) {
-        const successMessage = typeof response.message === 'string' ? response.message : "Login successful!"
-        toast.success(successMessage);
-
-        const { auth_token, user } = response.data;
-        console.log("🔐 OAuth login data received:", { hasToken: !!auth_token, hasUser: !!user });
-
-        if (user) {
-          console.log("🔐 Setting user in context:", user.user_id);
-          setUser(user as User);
-
-          // Connect to socket after successful login
-          if (user.user_id && user.role) {
-            try {
-              socketService.connect(user.user_id, user.role);
-              
-              socket.on("connect_error", (error) => {
-                console.error("Socket connection error:", error);
-                toast.error("Could not establish live connection. Some features may be limited.");
-              });
-            } catch (socketError) {
-              console.error("Socket connection error:", socketError);
-              toast.error("Could not establish live connection. Some features may be limited.");
-            }
-          }
-
-          // Notify other tabs of auth change
-          notifyAuthChange();
-          
-          // Navigate to home after successful login
-          setTimeout(() => {
-            console.log("🔐 OAuth Auth successful, navigating to home page...");
-            navigate("/");
-          }, 200);
-        } else {
-          console.error("🔐 No user data received from OAuth response");
-        }
-      } else {
-        console.log("🔐 OAuth login failed:", response.message);
-        const errorResponse = {
-          ...response,
-          message: typeof response.message === 'string' ? response.message : response.message?.message || "OAuth login failed"
-        };
-        handleApiErrors(errorResponse);
-      }
-    } catch (error) {
-      console.error("🔐 OAuth callback error:", error);
-      toast.error("OAuth authentication failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const logout = async () => {
     // Prevent multiple logout calls
     if (isLoggingOutRef.current) {
@@ -439,7 +380,6 @@ export const useAuth = () => {
     register,
     login,
     googleLogin,
-    handleOAuthCallback,
     verifyCode,
     resendVerification,
     resendCountdown,

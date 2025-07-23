@@ -203,10 +203,10 @@ const Feed = () => {
             <div className="w-full px-0 sm:px-4 py-4">
               <div className="text-center">
                 <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  Explore Amazing Work
+                  Explore the community update
                 </h1>
                 <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-300 mb-4 px-4 sm:px-0">
-                  Discover and showcase exceptional tasks completed by our talented community
+                  Share your progress, projects, and ideas — and discover what others in the Beembyte community are building.
                 </p>
                 {/* Search Bar */}
                 <div className="max-w-xl mx-auto relative px-4 sm:px-0">

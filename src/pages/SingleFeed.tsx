@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Star, ChevronLeft, ChevronRight, Share2, MessageCircle, Check, MoreHorizontal, Trash2 } from "lucide-react"
+import { ArrowLeft, Star, ChevronLeft, ChevronRight, Share2, MessageCircle, Check, MoreHorizontal, Trash2, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -288,7 +288,7 @@ export const SingleFeed: React.FC = () => {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4 mb-4">
-                  <Avatar 
+                  <Avatar
                     className="h-16 w-16 cursor-pointer"
                     onClick={() => navigate(`/profile/${post.user_id}`)}
                   >
@@ -304,32 +304,32 @@ export const SingleFeed: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h3 
-                          className="font-semibold cursor-pointer hover:underline mb-1" 
+                        <h3
+                          className="font-semibold cursor-pointer hover:underline mb-1"
                           style={{ fontSize: '16px' }}
                           onClick={() => navigate(`/profile/${post.user_id}`)}
                         >
                           {post.user.first_name} {post.user.last_name}
                         </h3>
                         <p className="text-muted-foreground text-sm mb-1">
-                          {post.user.is_vetted && post.user.responder_info?.job_title 
-                            ? post.user.responder_info.job_title 
+                          {post.user.is_vetted && post.user.responder_info?.job_title
+                            ? post.user.responder_info.job_title
                             : 'Community Member'}
                         </p>
                         <LinkupCount userId={post.user_id} className="mb-2" />
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2 mb-3 h-9">
                       {!isOwner && (
                         <>
-                          <Button 
+                          <Button
                             variant="outline"
                             size="sm"
                             onClick={() => navigate(`/chat/user/${post.user_id}`)}
-                            className="flex items-center gap-1 bg-white hover:bg-white border-gray-300 h-9"
+                            className="flex items-center gap-1 bg-white hover:none border-gray-300 h-9"
                           >
-                            <MessageCircle className="h-4 w-4" />
+                            <Send className="h-4 w-4 mr-2" />
                             <span className="text-xs">Message</span>
                           </Button>
                           <LinkupButton userId={post.user_id} />

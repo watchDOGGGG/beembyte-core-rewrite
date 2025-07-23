@@ -231,8 +231,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({
         {/* User Header - With padding and color coding */}
         <div className="px-3 sm:px-4 py-2.5">
           <div className="flex items-center space-x-2.5">
-            <Avatar 
-              className="h-8 w-8 flex-shrink-0 cursor-pointer" 
+            <Avatar
+              className="h-8 w-8 flex-shrink-0 cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/profile/${post.user_id}`);
@@ -250,8 +250,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1.5">
-                  <h4 
-                    className="font-semibold text-gray-900 dark:text-white truncate cursor-pointer hover:underline" 
+                  <h4
+                    className="font-semibold text-gray-900 dark:text-white truncate cursor-pointer hover:underline"
                     style={{ fontSize: '12px' }}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -301,7 +301,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({
             {/* Menu Dropdown - Show for everyone */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" style={{ alignSelf: 'self-start' }}>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -312,7 +312,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({
                       e.stopPropagation();
                       navigate(`/chat/user/${post.user_id}`);
                     }}
-                    className="hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    className=""
                   >
                     <Send className="h-4 w-4 mr-2" />
                     Message

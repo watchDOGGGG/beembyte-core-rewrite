@@ -162,11 +162,12 @@ const UserProfile: React.FC = () => {
                       <>
                         <Button 
                           onClick={handleMessage}
+                          variant="outline"
                           size="sm"
-                          className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                          className="flex items-center gap-1 bg-white hover:bg-white border-gray-300"
                         >
                           <MessageCircle className="h-4 w-4" />
-                          Message
+                          <span className="text-xs">Message</span>
                         </Button>
                         <LinkupButton userId={user.user_id} />
                       </>

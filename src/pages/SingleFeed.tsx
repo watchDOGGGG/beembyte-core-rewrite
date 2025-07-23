@@ -324,12 +324,13 @@ export const SingleFeed: React.FC = () => {
                       {!isOwner && (
                         <>
                           <Button 
+                            variant="outline"
                             size="sm"
                             onClick={() => navigate(`/chat/user/${post.user_id}`)}
-                            className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                            className="flex items-center gap-1 bg-white hover:bg-white border-gray-300"
                           >
                             <MessageCircle className="h-4 w-4" />
-                            Message
+                            <span className="text-xs">Message</span>
                           </Button>
                           <LinkupButton userId={post.user_id} />
                         </>

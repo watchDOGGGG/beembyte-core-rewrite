@@ -21,8 +21,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   className = "",
   autoPlay = false,
   muted = false,
-  enableScrollAutoPlay = false, // Changed default to false
-  enablePictureInPicture = false, // Changed default to false
+  enableScrollAutoPlay = true,
+  enablePictureInPicture = true,
   autoPlayWithSound = false
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -223,12 +223,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         ref={videoRef}
         src={src}
         className="w-full h-full object-contain bg-black"
-        autoPlay={false} // Disabled auto-play
-        muted={true} // Always muted by default
+        autoPlay={false} // Let the hook handle auto-play
+        muted={autoPlayWithSound ? false : true}
         onClick={togglePlay}
         playsInline
         preload="metadata"
-        disablePictureInPicture={!enablePictureInPicture} // Disable PiP based on prop
       />
       
       {/* Controls Overlay */}

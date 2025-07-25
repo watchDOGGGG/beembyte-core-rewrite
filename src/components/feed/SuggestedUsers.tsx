@@ -1,99 +1,22 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LinkupButton } from './LinkupButton';
 import { useNavigate } from 'react-router-dom';
-
-interface SuggestedUser {
-  _id: string;
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  is_vetted?: boolean;
-  responder_info?: {
-    job_title: string;
-    rank_status?: {
-      rank_name: string;
-      rank_color: string;
-    };
-  };
-}
-
-// Mockup data for suggested users
-const mockSuggestedUsers: SuggestedUser[] = [
-  {
-    _id: '1',
-    user_id: 'user_1',
-    first_name: 'Sarah',
-    last_name: 'Johnson',
-    email: 'sarah.johnson@example.com',
-    is_vetted: true,
-    responder_info: {
-      job_title: 'Frontend Developer',
-      rank_status: {
-        rank_name: 'Expert',
-        rank_color: '#10B981'
-      }
-    }
-  },
-  {
-    _id: '2',
-    user_id: 'user_2',
-    first_name: 'Michael',
-    last_name: 'Chen',
-    email: 'michael.chen@example.com',
-    is_vetted: true,
-    responder_info: {
-      job_title: 'UI/UX Designer',
-      rank_status: {
-        rank_name: 'Professional',
-        rank_color: '#3B82F6'
-      }
-    }
-  },
-  {
-    _id: '3',
-    user_id: 'user_3',
-    first_name: 'Emma',
-    last_name: 'Davis',
-    email: 'emma.davis@example.com',
-    is_vetted: false
-  },
-  {
-    _id: '4',
-    user_id: 'user_4',
-    first_name: 'David',
-    last_name: 'Wilson',
-    email: 'david.wilson@example.com',
-    is_vetted: true,
-    responder_info: {
-      job_title: 'Full Stack Developer',
-      rank_status: {
-        rank_name: 'Novice',
-        rank_color: '#F59E0B'
-      }
-    }
-  },
-  {
-    _id: '5',
-    user_id: 'user_5',
-    first_name: 'Lisa',
-    last_name: 'Rodriguez',
-    email: 'lisa.rodriguez@example.com',
-    is_vetted: true,
-    responder_info: {
-      job_title: 'Product Manager'
-    }
-  }
-];
+import { useSuggestedUsers } from '@/hooks/useSuggestedUsers';
+import { MoreHorizontal } from 'lucide-react';
 
 export const SuggestedUsers: React.FC = () => {
-  const [isLoading] = useState(false);
   const navigate = useNavigate();
+  const { data: suggestedUsers, isLoading } = useSuggestedUsers(5, 0); // Show 5 users on feed
 
   const handleUserClick = (userId: string) => {
     navigate(`/profile/${userId}`);
+  };
+
+  const handleViewAll = () => {
+    navigate('/suggested-users');
   };
 
   if (isLoading) {
@@ -120,18 +43,25 @@ export const SuggestedUsers: React.FC = () => {
     );
   }
 
-  if (mockSuggestedUsers.length === 0) {
+  if (!suggestedUsers || suggestedUsers.length === 0) {
     return null;
   }
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-sm">Suggested for you</CardTitle>
+        <button
+          onClick={handleViewAll}
+          className="flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium"
+        >
+          <MoreHorizontal className="h-4 w-4 mr-1" />
+          View all
+        </button>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {mockSuggestedUsers.slice(0, 5).map((user) => (
+          {suggestedUsers.map((user) => (
             <div key={user._id} className="flex items-center space-x-3">
               <Avatar 
                 className="h-10 w-10 cursor-pointer" 
@@ -154,19 +84,19 @@ export const SuggestedUsers: React.FC = () => {
                   {user.first_name} {user.last_name}
                 </h4>
                 <p className="text-xs text-muted-foreground truncate">
-                  {user.is_vetted && user.responder_info?.job_title 
-                    ? user.responder_info.job_title 
+                  {user.is_vetted && user.responder_id?.job_title 
+                    ? user.responder_id.job_title 
                     : 'Community Member'}
                 </p>
-                {user.responder_info?.rank_status && (
+                {user.responder_id?.rank_status && (
                   <span 
                     className="text-xs px-1.5 py-0.5 rounded-full"
                     style={{
-                      backgroundColor: user.responder_info.rank_status.rank_color + '20',
-                      color: user.responder_info.rank_status.rank_color
+                      backgroundColor: user.responder_id.rank_status.rank_color + '20',
+                      color: user.responder_id.rank_status.rank_color
                     }}
                   >
-                    {user.responder_info.rank_status.rank_name}
+                    {user.responder_id.rank_status.rank_name}
                   </span>
                 )}
               </div>

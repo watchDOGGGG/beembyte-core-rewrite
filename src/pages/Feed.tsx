@@ -341,7 +341,7 @@ const Feed = () => {
 
             {/* Sidebar - Only show on large screens */}
             <div className="hidden lg:block lg:w-80 lg:flex-shrink-0 lg:pt-3 lg:ml-0">
-              <div className="sticky top-20 space-y-4">
+              <div className="space-y-4">
                 {/* Suggested Users Section */}
                 <SuggestedUsers />
                 {/* Top Responders Section */}

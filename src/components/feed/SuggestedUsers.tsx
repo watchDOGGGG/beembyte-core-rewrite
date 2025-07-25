@@ -1,21 +1,17 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LinkupButton } from './LinkupButton';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { API_BASE_URL } from '@/config/env';
-import { ChevronRight } from 'lucide-react';
 
 interface SuggestedUser {
   _id: string;
+  user_id: string;
   first_name: string;
   last_name: string;
   email: string;
   is_vetted?: boolean;
-  user_id: string;
-  responder_id?: {
+  responder_info?: {
     job_title: string;
     rank_status?: {
       rank_name: string;
@@ -24,44 +20,80 @@ interface SuggestedUser {
   };
 }
 
-interface SuggestedUsersResponse {
-  message: string;
-  data: SuggestedUser[];
-  success: boolean;
-}
+// Mockup data for suggested users
+const mockSuggestedUsers: SuggestedUser[] = [
+  {
+    _id: '1',
+    user_id: 'user_1',
+    first_name: 'Sarah',
+    last_name: 'Johnson',
+    email: 'sarah.johnson@example.com',
+    is_vetted: true,
+    responder_info: {
+      job_title: 'Frontend Developer',
+      rank_status: {
+        rank_name: 'Expert',
+        rank_color: '#10B981'
+      }
+    }
+  },
+  {
+    _id: '2',
+    user_id: 'user_2',
+    first_name: 'Michael',
+    last_name: 'Chen',
+    email: 'michael.chen@example.com',
+    is_vetted: true,
+    responder_info: {
+      job_title: 'UI/UX Designer',
+      rank_status: {
+        rank_name: 'Professional',
+        rank_color: '#3B82F6'
+      }
+    }
+  },
+  {
+    _id: '3',
+    user_id: 'user_3',
+    first_name: 'Emma',
+    last_name: 'Davis',
+    email: 'emma.davis@example.com',
+    is_vetted: false
+  },
+  {
+    _id: '4',
+    user_id: 'user_4',
+    first_name: 'David',
+    last_name: 'Wilson',
+    email: 'david.wilson@example.com',
+    is_vetted: true,
+    responder_info: {
+      job_title: 'Full Stack Developer',
+      rank_status: {
+        rank_name: 'Novice',
+        rank_color: '#F59E0B'
+      }
+    }
+  },
+  {
+    _id: '5',
+    user_id: 'user_5',
+    first_name: 'Lisa',
+    last_name: 'Rodriguez',
+    email: 'lisa.rodriguez@example.com',
+    is_vetted: true,
+    responder_info: {
+      job_title: 'Product Manager'
+    }
+  }
+];
 
-interface SuggestedUsersProps {
-  limit?: number;
-  showViewMore?: boolean;
-}
-
-export const SuggestedUsers: React.FC<SuggestedUsersProps> = ({ 
-  limit = 5, 
-  showViewMore = true 
-}) => {
+export const SuggestedUsers: React.FC = () => {
+  const [isLoading] = useState(false);
   const navigate = useNavigate();
-
-  const { data: suggestedUsersData, isLoading, error } = useQuery({
-    queryKey: ['suggested-users', limit],
-    queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/users/suggested-users?limit=${limit}&skip=0`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch suggested users');
-      const result: SuggestedUsersResponse = await response.json();
-      return result.data;
-    },
-  });
 
   const handleUserClick = (userId: string) => {
     navigate(`/profile/${userId}`);
-  };
-
-  const handleViewMore = () => {
-    navigate('/suggested-users');
   };
 
   if (isLoading) {
@@ -88,29 +120,18 @@ export const SuggestedUsers: React.FC<SuggestedUsersProps> = ({
     );
   }
 
-  if (error || !suggestedUsersData || suggestedUsersData.length === 0) {
+  if (mockSuggestedUsers.length === 0) {
     return null;
   }
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm">Suggested for you</CardTitle>
-          {showViewMore && (
-            <button
-              onClick={handleViewMore}
-              className="text-xs text-primary hover:underline flex items-center gap-1"
-            >
-              View all
-              <ChevronRight className="h-3 w-3" />
-            </button>
-          )}
-        </div>
+        <CardTitle className="text-sm">Suggested for you</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {suggestedUsersData.slice(0, limit).map((user) => (
+          {mockSuggestedUsers.slice(0, 5).map((user) => (
             <div key={user._id} className="flex items-center space-x-3">
               <Avatar 
                 className="h-10 w-10 cursor-pointer" 
@@ -133,19 +154,19 @@ export const SuggestedUsers: React.FC<SuggestedUsersProps> = ({
                   {user.first_name} {user.last_name}
                 </h4>
                 <p className="text-xs text-muted-foreground truncate">
-                  {user.is_vetted && user.responder_id?.job_title 
-                    ? user.responder_id.job_title 
+                  {user.is_vetted && user.responder_info?.job_title 
+                    ? user.responder_info.job_title 
                     : 'Community Member'}
                 </p>
-                {user.responder_id?.rank_status && (
+                {user.responder_info?.rank_status && (
                   <span 
                     className="text-xs px-1.5 py-0.5 rounded-full"
                     style={{
-                      backgroundColor: user.responder_id.rank_status.rank_color + '20',
-                      color: user.responder_id.rank_status.rank_color
+                      backgroundColor: user.responder_info.rank_status.rank_color + '20',
+                      color: user.responder_info.rank_status.rank_color
                     }}
                   >
-                    {user.responder_id.rank_status.rank_name}
+                    {user.responder_info.rank_status.rank_name}
                   </span>
                 )}
               </div>
